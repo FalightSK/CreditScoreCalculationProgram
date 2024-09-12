@@ -4,7 +4,7 @@ import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from tkinter import filedialog
 
-from Script import newCustomer
+import newCustomer
 
 # Function to switch pages
 def show_frame(frame):
@@ -32,8 +32,8 @@ def submit_files():
     customer_id = id_entry.get()
     
     if financial_position_path and income_statement_path:
-        position = newCustomer.read_file(financial_position_path)
-        income = newCustomer.read_file(income_statement_path)
+        position = newCustomer.read_financial_file(financial_position_path)
+        income = newCustomer.read_financial_file(income_statement_path)
         credit_score = int(newCustomer.FICO_cal(newCustomer.extract_fin_info(position, income)))
         
         # Update the meter and labels on the credit score page
