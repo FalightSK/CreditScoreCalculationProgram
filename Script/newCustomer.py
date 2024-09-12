@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from customerInfo import FinancialInfo
+from .customerInfo import FinancialInfo
 
 def read_file(path):
     doc = pd.read_excel(path, header= 2)
@@ -83,12 +83,12 @@ def FICO_cal(all_fin_info, show = False):
         print('\nFICO SCORE:', round(FICO, 3))
     return FICO
      
-if __name__ == '__main__':
-    doc1 = read_file(r"D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Data\Original Data\financial data\00194\Financial Position 00194.xlsx")
-    doc2 = read_file(r"D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Data\Original Data\financial data\00194\Income Statement 00194.xlsx")
-    
-    fin_info = extract_fin_info(doc1, doc2)
-    FICO_cal(fin_info, show= True)
+# if __name__ == '__main__':
+#     doc1 = read_file(r"D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Data\Original Data\financial data\00194\Financial Position 00194.xlsx")
+#     doc2 = read_file(r"D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Data\Original Data\financial data\00194\Income Statement 00194.xlsx")
+#     
+#     fin_info = extract_fin_info(doc1, doc2)
+#     FICO_cal(fin_info, show= True)
     
     
 

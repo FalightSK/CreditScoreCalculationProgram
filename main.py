@@ -1,16 +1,52 @@
+import os
+import random
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from tkinter import filedialog
+
+from Script import newCustomer
 
 # Function to switch pages
 def show_frame(frame):
     frame.tkraise()
 
-# Function to handle file upload in the new user page
-def upload_file():
-    file_path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv"), ("All files", "*.*")])
-    if file_path:
-        label_file.config(text=f"File Uploaded: {file_path}")
+# Function to handle financial position file upload
+def upload_financial_position():
+    global financial_position_path
+    financial_position_path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xlsx"), ("CSV files", "*.csv"), ("All files", "*.*")])
+    if financial_position_path:
+        file_name = os.path.basename(financial_position_path)
+        label_financial_position.config(text=f"{file_name}")
+
+# Function to handle income statement file upload
+def upload_income_statement():
+    global income_statement_path
+    income_statement_path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xlsx"), ("CSV files", "*.csv"), ("All files", "*.*")])
+    if income_statement_path:
+        file_name = os.path.basename(income_statement_path)
+        label_income_statement.config(text=f"{file_name}")
+
+# Placeholder function for submitting files and moving to the credit score page
+def submit_files():
+    customer_name = name_entry.get()
+    customer_id = id_entry.get()
+    
+    if financial_position_path and income_statement_path:
+        # Generate random credit score between 300 and 850
+        credit_score = random.randint(300, 550)
+        position = newCustomer.read_file(financial_position_path)
+        income = newCustomer.read_file(income_statement_path)
+        credit_score = int(newCustomer.FICO_cal(newCustomer.extract_fin_info(position, income)))
+        
+        # Update the meter and labels on the credit score page
+        credit_meter.configure(amountused=credit_score)
+        label_credit_score_name.config(text=f"Customer Name: {customer_name}")
+        label_credit_score_id.config(text=f"Customer ID: {customer_id}")
+        
+        # Switch to the credit score page
+        show_frame(credit_score_page)
+    else:
+        print("Please upload both files.")
 
 # Create the main window
 root = ttk.Window(themename="superhero")  # Using the dark superhero theme
@@ -44,6 +80,10 @@ style.map('custom-success.TButton', foreground=[('pressed', 'white'), ('active',
 
 style.configure('custom-info.TButton', background='#17a2b8', foreground='white', font=('Segoe UI', 12), anchor='center')
 style.map('custom-info.TButton', foreground=[('pressed', 'white'), ('active', 'white')], background=[('pressed', '#117a8b'), ('active', '#17a2b8')])
+
+# Placeholder variables for file paths
+financial_position_path = ""
+income_statement_path = ""
 
 ### LANDING PAGE ###
 landing_page = ttk.Frame(container)
@@ -89,12 +129,25 @@ id_label.pack(pady=5)
 id_entry = ttk.Entry(new_user_page, font=custom_font_medium, width=40)
 id_entry.pack(pady=5)
 
-# File Upload Label and Button
-label_file = ttk.Label(new_user_page, text="Upload Financial Data (CSV)", font=custom_font_medium)
-label_file.pack(pady=10)
+# File upload forms placed in the same row
+file_frame = ttk.Frame(new_user_page)
+file_frame.pack(pady=10)
 
-btn_upload = ttk.Button(new_user_page, text="Upload File", command=upload_file, style="custom-info.TButton", width=20)
-btn_upload.pack(pady=10)
+# File upload for Financial Position (left side)
+label_financial_position = ttk.Label(file_frame, text="No file uploaded", font=custom_font_medium)
+label_financial_position.grid(row=0, column=0, padx=10, pady=5)
+btn_financial_position = ttk.Button(file_frame, text="Upload Financial Position", command=upload_financial_position, style="custom-info.TButton", width=20)
+btn_financial_position.grid(row=1, column=0, padx=10, pady=5)
+
+# File upload for Income Statement (right side)
+label_income_statement = ttk.Label(file_frame, text="No file uploaded", font=custom_font_medium)
+label_income_statement.grid(row=0, column=1, padx=10, pady=5)
+btn_income_statement = ttk.Button(file_frame, text="Upload Income Statement", command=upload_income_statement, style="custom-info.TButton", width=20)
+btn_income_statement.grid(row=1, column=1, padx=10, pady=5)
+
+# Submit Files Button
+btn_submit_files = ttk.Button(new_user_page, text="Submit Files", command=submit_files, style="custom-success.TButton", width=20)
+btn_submit_files.pack(pady=20)
 
 # Back Button
 btn_back_to_landing = ttk.Button(new_user_page, text="Back to Landing Page", command=lambda: show_frame(landing_page),
@@ -111,6 +164,30 @@ main_page_title.pack(pady=50)
 btn_back_to_landing_main = ttk.Button(main_page, text="Back to Landing Page", command=lambda: show_frame(landing_page),
                                       style="custom-danger.TButton", width=20)
 btn_back_to_landing_main.pack(pady=20)
+
+### CREDIT SCORE PAGE ###
+credit_score_page = ttk.Frame(container)
+credit_score_page.grid(row=0, column=0, sticky="nsew")
+
+# Title for Credit Score Page
+credit_score_title = ttk.Label(credit_score_page, text="Credit Score", font=custom_font_large, bootstyle="primary")
+credit_score_title.pack(pady=20)
+
+# Customer Name and ID Labels
+label_credit_score_name = ttk.Label(credit_score_page, text="Customer Name:", font=custom_font_medium)
+label_credit_score_name.pack(pady=5)
+label_credit_score_id = ttk.Label(credit_score_page, text="Customer ID:", font=custom_font_medium)
+label_credit_score_id.pack(pady=5)
+
+# Credit Score Meter
+credit_meter = ttk.Meter(credit_score_page, bootstyle="success", subtext="Credit Score", interactive=False, amounttotal=850,
+                         meterthickness=20, textright='points', textfont=("Segoe UI", 16), subtextfont=("Segoe UI", 12))
+credit_meter.pack(pady=20)
+
+# Add Return Button to go back to Landing Page
+btn_return_to_landing = ttk.Button(credit_score_page, text="Return to Landing Page", command=lambda: show_frame(landing_page),
+                                   style="custom-danger.TButton", width=20)
+btn_return_to_landing.pack(pady=20)
 
 # Start with the landing page
 show_frame(landing_page)
