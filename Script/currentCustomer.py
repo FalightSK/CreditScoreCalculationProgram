@@ -6,7 +6,7 @@ import databaseClient as db
 
 from datetime import datetime
 
-def cal_payment_his(payment_info, credit_term= 30):
+def cal_payment_his(payment_info, credit_term= 30, show= False):
     # Set initial value
     if payment_info.stat == 'FULL':
         S0 = 850
@@ -72,25 +72,41 @@ def cal_amount_owed(payment_info, show= False):
     if show: print(f'> Delay Time: {delay_time}\n> Adjustment: {A}\n> Multiplier: {M}\n')
     return Sf
         
-def cal_credit_history_lenght(customer_id):
-    x = db.get_number_of_order_by_id(customer_id)
-    customer_type = db.get_info_by_id(customer_id)['type']
-    print(x)
+def cal_credit_history_lenght(customer_id, show = False):
+    n = db.get_number_of_order_by_id(customer_id)
+    info = db.get_info_by_id(customer_id)
     
+    # Freq
+    customer_type = info['type']
     criteria = db.get_criteria_credit_history(customer_type)
     
-    print(criteria[])
-    Sf = 300 + (x/criteria * 550/12)
-    return Sf
+    x = n//criteria[1]
+    x = 12 if x > 12 else x
+    if show: print('x->', x)
+    
+    Sf_freq = 300 + (x * 550/12)
+    
+    # Value
+    val = 0
+    for data in info['records']:
+        val += data['amount']
+    x = val//criteria[0]
+    if show: print('x->', x)
+    
+    Sf_val = 300 + (x * 550/12)
+    
+    return min([Sf_freq, Sf_val])
 
 def cal_credit_mix(customer_id, show= False):
     info = db.get_info_by_id(customer_id)['financial_info']
+    # print(info)
+    if len(info) == 0:
+        return 0
+    
     financial_info = FinancialInfo()
     financial_info.JSON_to_FinancialInfo(info[len(info) - 1])
-    financial_info.show()
+    # financial_info.show()
     
-    if financial_info.total_assets is None:
-        return 0
     
     credit_mix_ratio = financial_info.current_assets / financial_info.total_liabilities
     debt_to_equity = 1 - (financial_info.total_liabilities / financial_info.shareholder_equity)
@@ -103,7 +119,7 @@ def cal_credit_mix(customer_id, show= False):
     credit_mix = (0.6 * credit_mix_ratio + 0.2 * debt_to_equity + 0.2 * debt_to_assets) * 550 + 300
     return credit_mix
 
-def cal_new_credit(customer_id, requested_budget):
+def cal_new_credit(customer_id, requested_budget, show= False):
     mean = db.get_mean_by_id(customer_id)
     std = db.get_std_by_id(customer_id)
     
@@ -111,17 +127,28 @@ def cal_new_credit(customer_id, requested_budget):
     Sf = 850 - 20 * np.exp(1.65 * z)
     return Sf
 
+def cal_FICO_current(payment_his, amoutn_owed, credit_his_len, credti_mix, new_credit):
+    return 0.35 * payment_his + 0.3 * amoutn_owed + 0.15 * credit_his_len + 0.1 * credti_mix + 0.1 * new_credit
 
 if __name__ == '__main__':
-    test_customer = db.read()['history']['00001']['records'][0]
-    print(test_customer)
+    customer_ID = '00009'
+    requested_budget = 10000
+    
+    test_customer = db.get_info_by_id(customer_ID)
     
     P = PaymentInfo()
-    P.JSON_to_PaymentInfo(test_customer)
-    P.show()
+    P.JSON_to_PaymentInfo(test_customer['records'][0])
+    # P.show()
     
-    print('val:', cal_amount_owed(P))
-    print('credit his len:', cal_credit_history_lenght('00001'))
+
+    print('>> payment_his:', cal_payment_his(P))
+    print('>> amount_owed:', cal_amount_owed(P))
+    print('>> credit_mix:', cal_credit_mix(customer_ID))
+    print('>> credit_his_len:', cal_credit_history_lenght(customer_ID))
+    print('>> new_credit:', cal_new_credit(customer_ID, requested_budget))
+    
+    print('>>>>> FICO:', cal_FICO_current(cal_payment_his(P), cal_amount_owed(P), cal_credit_mix(customer_ID), cal_credit_history_lenght(customer_ID), cal_new_credit(customer_ID, requested_budget)), '<<<<<')
+    
     # print('credit mix:', cal_credit_mix('00007'))
 
 
