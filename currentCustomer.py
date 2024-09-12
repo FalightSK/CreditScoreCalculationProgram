@@ -131,7 +131,7 @@ def cal_FICO_current(payment_his, amoutn_owed, credit_his_len, credti_mix, new_c
     return 0.35 * payment_his + 0.3 * amoutn_owed + 0.15 * credit_his_len + 0.1 * credti_mix + 0.1 * new_credit
 
 if __name__ == '__main__':
-    customer_ID = '00009'
+    customer_ID = '00003'
     requested_budget = 10000
     
     test_customer = db.get_info_by_id(customer_ID)
