@@ -2,7 +2,7 @@ import json
 import os
 
 Dir = os.getcwd()
-path = 'Script/database.txt'
+path = 'Script\\database.json'
 path = os.path.join(Dir, path)
 
 # JSON utilities
@@ -37,4 +37,20 @@ def get_info_by_id(customer_id):
 
 
 if __name__ == '__main__':
-    print(get_mean_by_id('00001'))
+    save({'test': 'helloworld!!!'})
+    # print(get_mean_by_id('00001'))
+    
+    # with open('Script/database.json', 'w') as file:
+    #     json_file = {
+    #         'micket': 1,
+    #         'test': {
+    #             'local': 1,
+    #             'not local': 2}
+    #         }
+    #     json.dump(json_file, file)
+        
+        
+    # with open('Script\database.json', 'r') as file:
+    #     local_file = json.load(file)
+    #     print(local_file['test'])
+    # print('save success')
