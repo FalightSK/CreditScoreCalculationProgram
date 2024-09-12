@@ -1,9 +1,6 @@
 import numpy as np
-from Script.customerInfo import PaymentInfo, FinancialInfo
-from Script.newCustomer import extract_fin_info
+from Script.customerInfo import PaymentInfo, FinancialInfo, extract_fin_info
 import Script.databaseClient as db
-
-
 from datetime import datetime
 
 def cal_payment_his(payment_info, credit_term= 30, show= False):
@@ -153,6 +150,4 @@ if __name__ == '__main__':
 
 
 
-    
-    
     

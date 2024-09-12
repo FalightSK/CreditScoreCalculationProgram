@@ -1,7 +1,9 @@
 import copy
 import datetime
+import pandas as pd
 #181146
 
+# Data Classes
 class FinancialInfo():
     def __init__(self):
         self.total_assets = None
@@ -32,8 +34,7 @@ class FinancialInfo():
     
     def copy(self):
         return copy.copy(self)
-    
-    
+        
 class PaymentInfo():
     method_list = ['CASH', 'IN_STORE', 'OTHERS', 'CREDIT_CARD']
     stat_list = ['FULL', 'PARTIAL', 'OVERDUE']
@@ -73,6 +74,36 @@ class PaymentInfo():
     
     def show(self):
         print(f'stat: {self.stat}\norder date: {self.order_date}\npaid_date: {self.paid_date}\namount: {self.amount}\nmethod: {self.method}')
+
+# Util Functions 
+def read_financial_file(path):
+    doc = pd.read_excel(path, header= 2)
+    return doc
+
+def extract_fin_info(doc_position, doc_income):
+    
+    # an empty list to contain financial info throughout the years
+    fin_info = []
+    
+    for i in range(2, len(doc_position.iloc[0]), 2):
+        local_fin_info = FinancialInfo()
+        
+        try:
+            local_fin_info.total_assets = float(str(doc_position.iloc[6][i]).replace(',', ''))
+            local_fin_info.current_assets = float(str(doc_position.iloc[3][i]).replace(',', ''))
+            local_fin_info.total_liabilities = float(str(doc_position.iloc[9][i]).replace(',', ''))
+            local_fin_info.shareholder_equity = float(str(doc_position.iloc[10][i]).replace(',', ''))
+            
+            local_fin_info.total_revenue = float(str(doc_income.iloc[2][i]).replace(',', ''))
+            
+            # local_fin_info.show()
+            fin_info.append(local_fin_info.copy())
+        
+        except:
+            print('found NONE value')
+        
+        
+    return fin_info
 
 
 # Data Structure
