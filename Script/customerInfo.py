@@ -51,9 +51,13 @@ class PaymentInfo():
         self.method = JSON['method']
         
         date01 = JSON['order_date']
-        date02 = JSON['paid_date']
         self.order_date = datetime.datetime(date01[2], date01[1], date01[0])
-        self.paid_date = datetime.datetime(date02[2], date02[1], date02[0])
+        
+        date02 = JSON['paid_date']
+        if date02 is None:
+            self.paid_date = None
+        else:
+            self.paid_date = datetime.datetime(date02[2], date02[1], date02[0])
         
     def PaymentInfo_to_JSON(self):
         JSON = {
@@ -85,6 +89,8 @@ user = {
     'customer_id': None,
     'type': None,
     'credit_score': None,
+    'credit_budget': None,
+    'credit_terms': None,
     'financial_info': {
         'total_assets': None,
         'current_assets': None,
