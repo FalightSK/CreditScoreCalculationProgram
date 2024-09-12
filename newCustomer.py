@@ -49,7 +49,8 @@ def FICO_cal(all_fin_info, show = False):
             
             
     # print(amount_owe_list, credit_mix_list, new_credit_list)
-    FICO = 0.6 * np.mean(amount_owe_list) + 0.2 * np.mean(credit_mix_list) + 0.2 * np.mean(new_credit_list)
+    n_fin_info = len(amount_owe_list) - 1
+    FICO = 0.6 * amount_owe_list[n_fin_info] + 0.2 * credit_mix_list[n_fin_info] + 0.2 * np.mean(new_credit_list)
     if show:
         print('\nFICO SCORE:', round(FICO, 3))
     return min(FICO, 850)
