@@ -75,6 +75,7 @@ class PaymentInfo():
     def show(self):
         print(f'stat: {self.stat}\norder date: {self.order_date}\npaid_date: {self.paid_date}\namount: {self.amount}\nmethod: {self.method}')
 
+
 # Util Functions 
 def read_financial_file(path):
     doc = pd.read_excel(path, header= 2)
@@ -85,17 +86,19 @@ def extract_fin_info(doc_position, doc_income):
     # an empty list to contain financial info throughout the years
     fin_info = []
     
-    for i in range(2, len(doc_position.iloc[0]), 2):
+    col = doc_position.columns
+    for i in range(2, len(col), 2):
         local_fin_info = FinancialInfo()
         
         try:
-            local_fin_info.total_assets = float(str(doc_position.iloc[6][i]).replace(',', ''))
-            local_fin_info.current_assets = float(str(doc_position.iloc[3][i]).replace(',', ''))
-            local_fin_info.total_liabilities = float(str(doc_position.iloc[9][i]).replace(',', ''))
-            local_fin_info.shareholder_equity = float(str(doc_position.iloc[10][i]).replace(',', ''))
+            local_fin_info.total_assets = float(str(doc_position[col[i]][6]).replace(',', ''))
+            local_fin_info.current_assets = float(str(doc_position[col[i]][3]).replace(',', ''))
+            local_fin_info.total_liabilities = float(str(doc_position[col[i]][9]).replace(',', ''))
+            local_fin_info.shareholder_equity = float(str(doc_position[col[i]][10]).replace(',', ''))
             
-            local_fin_info.total_revenue = float(str(doc_income.iloc[2][i]).replace(',', ''))
+            local_fin_info.total_revenue = float(str(doc_income[col[i]][2]).replace(',', ''))
             
+            # print('\n')
             # local_fin_info.show()
             fin_info.append(local_fin_info.copy())
         
@@ -143,6 +146,6 @@ summary = {
         'std': None
     }
 }
-    
-    
+
+
         
