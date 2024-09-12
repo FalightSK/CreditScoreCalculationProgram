@@ -153,11 +153,20 @@ def cal_new_credit(customer_id, requested_budget, show= False):
         
     return Sf
 
-def cal_FICO_current(payment_his, amoutn_owed, credit_his_len, credti_mix, new_credit):
-    return 0.35 * payment_his + 0.3 * amoutn_owed + 0.15 * credit_his_len + 0.1 * credti_mix + 0.1 * new_credit
+def cal_FICO_current(customer_id, payment_info, requested_budget, show = False):
+    Score = 0.35 * (payment_his := cal_payment_his(payment_info)) + 0.3 * (amount_owed := cal_amount_owed(payment_info)) + 0.15 * (credit_history_lenght := cal_credit_history_lenght(customer_id)) + 0.1 * (credit_mix := cal_credit_mix(customer_id)) + 0.1 * (new_credit := cal_new_credit(customer_id, requested_budget))
+    if show:
+        print('>> payment_his:', payment_his)
+        print('>> amount_owed:', amount_owed)
+        print('>> credit_his_len:', credit_history_lenght)
+        print('>> credit_mix:', credit_mix)
+        print('>> new_credit:', new_credit)
+        
+    return Score
+    
 
 if __name__ == '__main__':
-    customer_ID = '00007'
+    customer_ID = '00003'
     requested_budget = 10000
     
     test_customer = db.get_info_by_id(customer_ID)
@@ -167,13 +176,13 @@ if __name__ == '__main__':
     # P.show()
     
 
-    print('>> payment_his:', cal_payment_his(P))
-    print('>> amount_owed:', cal_amount_owed(P))
-    print('>> credit_mix:', cal_credit_mix(customer_ID))
-    print('>> credit_his_len:', cal_credit_history_lenght(customer_ID))
-    print('>> new_credit:', cal_new_credit(customer_ID, requested_budget))
+    # print('>> payment_his:', cal_payment_his(P))
+    # print('>> amount_owed:', cal_amount_owed(P))
+    # print('>> credit_mix:', cal_credit_mix(customer_ID))
+    # print('>> credit_his_len:', cal_credit_history_lenght(customer_ID))
+    # print('>> new_credit:', cal_new_credit(customer_ID, requested_budget))
     
-    print('>>>>> FICO:', cal_FICO_current(cal_payment_his(P), cal_amount_owed(P), cal_credit_mix(customer_ID), cal_credit_history_lenght(customer_ID), cal_new_credit(customer_ID, requested_budget)), '<<<<<')
+    print('>>>>> FICO:', cal_FICO_current(customer_ID, P, requested_budget, show = True), '<<<<<')
     
     # print('credit mix:', cal_credit_mix('00007'))
 
