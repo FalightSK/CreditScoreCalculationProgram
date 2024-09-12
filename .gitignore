@@ -2,3 +2,4 @@ maxis/
 __pycache__/
 */__pycache__/
 temp.py
+design.py
