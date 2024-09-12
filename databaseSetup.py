@@ -3,8 +3,7 @@ import os
 import numpy as np
 import datetime
 import Script.databaseClient as db
-from Script.customerInfo import order
-from Script.newCustomer import extract_fin_info, read_file
+from Script.customerInfo import order, extract_fin_info, read_financial_file
 
 
 # def set_date(dmy):
@@ -16,7 +15,7 @@ doc = pd.read_excel(r"D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_202
 doc.fillna('UNKNOWN', inplace= True)
 # doc2 = pd.read_excel()
 
-'''
+
 prev_id = ''
 prev_cus_id = ''
 users = {}
@@ -88,9 +87,9 @@ database = {
 }        
 
 db.save(database)
-'''
 
-'''
+
+
 database = db.read()['history']
 
 type_shop_list = {}
@@ -137,7 +136,7 @@ for key, val in type_shop_list.items():
 print(new_database['summary'])
 
 db.save(new_database)
-'''
+
 
 
 
@@ -147,8 +146,8 @@ path = r'D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Dat
 for dir in os.listdir(path):
     target = os.path.join(path, dir)
     try:
-        doc1 = read_file(os.path.join(target, f'Financial Position {dir}.xlsx'))
-        doc2 = read_file(os.path.join(target, f'Income Statement {dir}.xlsx'))
+        doc1 = read_financial_file(os.path.join(target, f'Financial Position {dir}.xlsx'))
+        doc2 = read_financial_file(os.path.join(target, f'Income Statement {dir}.xlsx'))
     except:
         print(dir)
     

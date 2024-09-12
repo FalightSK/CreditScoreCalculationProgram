@@ -116,7 +116,8 @@ order = {
     'amount': None,
     'stat': None,
     'paid_date': None,
-    'method': None
+    'method': None,
+    'local_credit_score': None
 }
 
 user = {
