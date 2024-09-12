@@ -46,8 +46,8 @@ def submit_files():
         else:
             credit_meter.configure(bootstyle="danger")
         
-        label_credit_score_name.config(text=f"Customer Name: {customer_name}")
-        label_credit_score_id.config(text=f"Customer ID: {customer_id}")
+        label_credit_score_name.config(text=f"Customer ID: {customer_name}")
+        label_credit_score_id.config(text=f"Customer Type: {customer_id}")
         
         # Switch to the credit score page
         show_frame(credit_score_page)
@@ -123,14 +123,14 @@ new_user_page.grid(row=0, column=0, sticky="nsew")
 new_user_title = ttk.Label(new_user_page, text="New User Registration", font=custom_font_large, bootstyle="primary")
 new_user_title.pack(pady=20)
 
-# Input field for Customer Name
-name_label = ttk.Label(new_user_page, text="Customer Name:", font=custom_font_medium)
+# Input field for Customer ID
+name_label = ttk.Label(new_user_page, text="Customer ID:", font=custom_font_medium)
 name_label.pack(pady=5)
 name_entry = ttk.Entry(new_user_page, font=custom_font_medium, width=40)
 name_entry.pack(pady=5)
 
-# Input field for Customer ID
-id_label = ttk.Label(new_user_page, text="Customer ID:", font=custom_font_medium)
+# Input field for Customer Type
+id_label = ttk.Label(new_user_page, text="Customer Type:", font=custom_font_medium)
 id_label.pack(pady=5)
 id_entry = ttk.Entry(new_user_page, font=custom_font_medium, width=40)
 id_entry.pack(pady=5)
@@ -179,21 +179,21 @@ credit_score_page.grid(row=0, column=0, sticky="nsew")
 credit_score_title = ttk.Label(credit_score_page, text="Credit Score", font=custom_font_large, bootstyle="primary")
 credit_score_title.pack(pady=20)
 
-# Customer Name and ID Labels
-label_credit_score_name = ttk.Label(credit_score_page, text="Customer Name:", font=custom_font_medium)
+# Customer Type and ID Labels
+label_credit_score_name = ttk.Label(credit_score_page, text="Customer ID:", font=custom_font_medium)
 label_credit_score_name.pack(pady=5)
-label_credit_score_id = ttk.Label(credit_score_page, text="Customer ID:", font=custom_font_medium)
+label_credit_score_id = ttk.Label(credit_score_page, text="Customer Type:", font=custom_font_medium)
 label_credit_score_id.pack(pady=5)
 
 # Credit Score Meter
 credit_meter = ttk.Meter(credit_score_page, bootstyle="success", subtext="Credit Score", interactive=False, amounttotal=850,
-                         meterthickness=20, textright='points', textfont=("Segoe UI", 16), subtextfont=("Segoe UI", 12))
+                         meterthickness=20, textright='/ 850', arcrange=200, arcoffset=-190)
 credit_meter.pack(pady=20)
 
 # Add Return Button to go back to Landing Page
 btn_return_to_landing = ttk.Button(credit_score_page, text="Return to Landing Page", command=lambda: show_frame(landing_page),
                                    style="custom-danger.TButton", width=20)
-btn_return_to_landing.pack(pady=20)
+btn_return_to_landing.pack(pady=10)
 
 # Start with the landing page
 show_frame(landing_page)
