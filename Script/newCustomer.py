@@ -81,7 +81,7 @@ def FICO_cal(all_fin_info, show = False):
     FICO = 0.6 * np.mean(amount_owe_list) + 0.2 * np.mean(credit_mix_list) + 0.2 * np.mean(new_credit_list)
     if show:
         print('\nFICO SCORE:', round(FICO, 3))
-    return FICO
+    return min(FICO, 850)
      
 # if __name__ == '__main__':
 #     doc1 = read_file(r"D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Data\Original Data\financial data\00194\Financial Position 00194.xlsx")

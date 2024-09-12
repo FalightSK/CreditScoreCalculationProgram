@@ -32,14 +32,20 @@ def submit_files():
     customer_id = id_entry.get()
     
     if financial_position_path and income_statement_path:
-        # Generate random credit score between 300 and 850
-        credit_score = random.randint(300, 550)
         position = newCustomer.read_file(financial_position_path)
         income = newCustomer.read_file(income_statement_path)
         credit_score = int(newCustomer.FICO_cal(newCustomer.extract_fin_info(position, income)))
         
         # Update the meter and labels on the credit score page
         credit_meter.configure(amountused=credit_score)
+        
+        if credit_score >= 740:
+            credit_meter.configure(bootstyle="success")
+        elif credit_score >= 580:
+            credit_meter.configure(bootstyle="warning")
+        else:
+            credit_meter.configure(bootstyle="danger")
+        
         label_credit_score_name.config(text=f"Customer Name: {customer_name}")
         label_credit_score_id.config(text=f"Customer ID: {customer_id}")
         

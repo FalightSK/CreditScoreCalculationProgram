@@ -1,5 +1,9 @@
 import json
-path = 'database.txt'
+import os
+
+Dir = os.getcwd()
+path = 'Script/database.txt'
+path = os.path.join(Dir, path)
 
 # JSON utilities
 def save(json_file, path= path):
