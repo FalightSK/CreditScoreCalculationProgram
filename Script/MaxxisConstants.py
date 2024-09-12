@@ -1,0 +1,1 @@
+credit_term = 30

@@ -1,12 +1,12 @@
 import pandas as pd
 import numpy as np
-from financialInfo import FinancialInfo
+from customerInfo import FinancialInfo
 
 def read_file(path):
     doc = pd.read_excel(path, header= 2)
     return doc
 
-def extractFinInfo(doc_position, doc_income):
+def extract_fin_info(doc_position, doc_income):
     
     # an empty list to contain financial info throughout the years
     fin_info = []
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     doc1 = read_file(r"D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Data\Original Data\financial data\00194\Financial Position 00194.xlsx")
     doc2 = read_file(r"D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Data\Original Data\financial data\00194\Income Statement 00194.xlsx")
     
-    fin_info = extractFinInfo(doc1, doc2)
+    fin_info = extract_fin_info(doc1, doc2)
     FICO_cal(fin_info, show= True)
     
     
