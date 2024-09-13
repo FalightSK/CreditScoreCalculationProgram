@@ -32,6 +32,15 @@ class FinancialInfo():
         }
         return JSON
     
+    def FinancialInfo_to_DICT(self): 
+        return {
+            'total_assets': self.total_assets,
+            'current_assets': self.current_assets,
+            'total_liabilities': self.total_liabilities,
+            'total_revenue': self.total_revenue,
+            'shareholder_equity': self.shareholder_equity
+            }
+    
     def copy(self):
         return copy.copy(self)
         
@@ -124,15 +133,15 @@ user = {
     'customer_id': None,
     'type': None,
     'credit_score': None,
-    'credit_budget': None,
-    'credit_terms': None,
-    'financial_info': {
+    'credit_budget': 17000,
+    'credit_terms': 15,
+    'financial_info': [{
         'total_assets': None,
         'current_assets': None,
         'total_liabilities': None,
         'total_revenue': None,
         'shareholder_equity': None
-    },
+    }],
     'record_summary': {
         'mean': None,
         'std': None,

@@ -43,7 +43,11 @@ def update_credit_score(customer_id, score):
     database['history'][customer_id]['credit_score'] = score
     save(database)
 
-
+def add_new_user(customer_info):
+    database = read()
+    database['history'][customer_info['customer_id']] = customer_info
+    save(database)
+    
 
 if __name__ == '__main__':
     pass
