@@ -3,7 +3,8 @@ from Script.customerInfo import PaymentInfo, FinancialInfo, extract_fin_info
 import Script.databaseClient as db
 from datetime import datetime
 
-def cal_payment_his(payment_info, credit_term= 30, show= False):
+# Score calculation
+def cal_payment_his(payment_info, credit_term= 15, show= False):
     # Set initial value
     if payment_info.stat == 'FULL':
         S0 = 850
@@ -169,20 +170,54 @@ def cal_FICO_current(customer_id, payment_info, requested_budget, set_n= 100, sh
         print('>> new_credit:', new_credit)
         
     return Score
+
+# Score retrieve
+def cal_final_FICO_score(customer_id, cal_duration= 185, show= False):
+    info = db.get_info_by_id(customer_id)
+    orders = info['records']
     
+    FICO = []
+    for i, order in enumerate(orders):
+        today = datetime.now()
+        order_date = datetime(order['order_date'][2], order['order_date'][1], order['order_date'][0])
+        day_dif = today - order_date
+        
+        if show: print(i, order['ID'], day_dif, sep=' | ')
+        if day_dif.days < cal_duration:
+            FICO.append(order['local_credit_score'])
+        else:
+            break
+    
+    if show: print(f'{customer_id}: [{len(FICO)}] -> {FICO} >>>>> ', end='')
+    if len(FICO) == 0: return 300
+    return int(np.mean(FICO))
+        
+def update_FICO_score(customer_id, cal_duration= 185, score= None):
+    if score is None:
+        score = cal_final_FICO_score(customer_id, cal_duration= 185)
+        
+    db.update_credit_score(customer_id, score)
+
+def get_FICO_score(customer_id):
+    return db.get_info_by_id(customer_id)['credit_score']
 
 if __name__ == '__main__':
-    customer_ID = '00003'
-    requested_budget = 10000
+    customer_ID = '00001'
+    # 00027
     
-    test_customer = db.get_info_by_id(customer_ID)
+    ### Calculation test
+    # requested_budget = 10000
     
-    P = PaymentInfo()
-    P.JSON_to_PaymentInfo(test_customer['records'][0])
+    # test_customer = db.get_info_by_id(customer_ID)
+    
+    # P = PaymentInfo()
+    # P.JSON_to_PaymentInfo(test_customer['records'][0])
     # P.show()
-    print('>>>>> FICO:', cal_FICO_current(customer_ID, P, requested_budget, show = True), '<<<<<')
+    # print('>>>>> FICO:', cal_FICO_current(customer_ID, P, requested_budget, show = True), '<<<<<')
+
     
-    # print('credit mix:', cal_credit_mix('00007'))
+    ### Data retrival test
+    print('FICO Score:', cal_final_FICO_score(customer_ID, show= True))
 
 
 

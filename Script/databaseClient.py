@@ -36,8 +36,18 @@ def get_info_by_id(customer_id):
     return read()['history'][customer_id]
 
 
+
+# Update database
+def update_credit_score(customer_id, score):
+    database = read()
+    database['history'][customer_id]['credit_score'] = score
+    save(database)
+
+
+
 if __name__ == '__main__':
-    save({'test': 'helloworld!!!'})
+    pass
+    # save({'test': 'helloworld!!!'})
     # print(get_mean_by_id('00001'))
     
     # with open('Script/database.json', 'w') as file:

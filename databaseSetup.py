@@ -4,7 +4,7 @@ import numpy as np
 import datetime
 import Script.databaseClient as db
 from Script.customerInfo import order, extract_fin_info, read_financial_file, PaymentInfo
-from currentCustomer import cal_FICO_current
+from currentCustomer import cal_FICO_current, cal_final_FICO_score
 
 
 # def set_date(dmy):
@@ -195,7 +195,7 @@ def upload_cred_criteria():
 
 
 ############ Update credit score
-def upload_credit_score():
+def upload_local_credit_score():
     database = db.read()
     
     ## update specific person
@@ -212,19 +212,20 @@ def upload_credit_score():
     
     for user, val in database['history'].items():
         print('\n', val['customer_id'])
-        
-        for i_order, order in enumerate(val['records']):
-            
+
+        n_record = len(val['records'])
+        for i_order in range(n_record-1, -1, -1):
+            order = val['records'][i_order]
             requested_budget = order['amount']
             payment_info = PaymentInfo()
             payment_info.JSON_to_PaymentInfo(order)
-            FICO = round(cal_FICO_current(user, payment_info, requested_budget, set_n= i_order+1, show= False), 3)
+            
+            FICO = round(cal_FICO_current(user, payment_info, requested_budget, set_n= n_record-i_order, show= False), 3)
             database['history'][user]['records'][i_order]['local_credit_score'] = FICO
             print(f'({i_order} - {FICO})', end=' ')
 
         # print(database['history'][user])
-        
-        # break
+
 
     print('----------- DONE -----------')
     new_database = {
@@ -234,7 +235,27 @@ def upload_credit_score():
         }  
     # print(database['history']['50083']['records'])
     db.save(new_database)
+
+def upload_credit_score():
+    database = db.read()
     
+    for user, val in database['history'].items():
+        print(user)
+        score = cal_final_FICO_score(user)
+        
+        if score == 300:
+           score = cal_final_FICO_score(user, cal_duration= 10e9) 
+        print(f'{user} - {score}')
+        
+        database['history'][user]['credit_score'] = score
+
+    new_database = {
+        'history': database['history'],
+        'summary': database['summary'],
+        'credit_history_criteria': database['credit_history_criteria']
+        }  
+    # print(database['history']['50083']['records'])
+    db.save(new_database)
    
    
     
@@ -243,4 +264,7 @@ if __name__ == '__main__':
     # upload_record_sum()
     # upload_fin_record()
     # upload_cred_criteria()
+    # upload_local_credit_score()
     upload_credit_score()
+    
+    # print(np.mean([3]))
