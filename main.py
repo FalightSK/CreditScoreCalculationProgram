@@ -159,7 +159,7 @@ btn_back_to_landing.pack(pady=20)
 ################# ################# #################
 
 ################# MAIN PAGE (Mockup for now) #################
-from mockup import mock_data
+import Script.databaseClient as db
 
 main_page = ttk.Frame(container)
 main_page.grid(row=0, column=0, sticky="nsew")
@@ -210,7 +210,7 @@ customer_table.tag_configure("oddrow", background="#2A2A40")
 
 # Add data to the table with color-coded emoticons and alternating row colors
 row_num = 0
-for customer in mock_data.values():
+for customer in db.read()["history"].values():
     color, tag, emoticon = get_rating_and_color(customer["credit_score"])
     row_tag = "evenrow" if row_num % 2 == 0 else "oddrow"
     
