@@ -69,12 +69,14 @@ def cal_amount_owed(payment_info, show= False):
     if show: print(f'> Delay Time: {delay_time}\n> Adjustment: {A}\n> Multiplier: {M}\n')
     return Sf
         
-def cal_credit_history_lenght(customer_id, show = False):
+def cal_credit_history_lenght(customer_id, show= False):
     n = db.get_number_of_order_by_id(customer_id)
     info = db.get_info_by_id(customer_id)
     
     # Freq
     customer_type = info['type']
+    if customer_type == 'UNKNOWN':
+        return 0
     criteria = db.get_criteria_credit_history(customer_type)
     
     x = n//criteria[1]
@@ -115,10 +117,10 @@ def cal_credit_mix(customer_id, show= False):
     credit_mix = (0.6 * credit_mix_ratio + 0.2 * debt_to_equity + 0.2 * debt_to_assets) * 550 + 300
     return credit_mix
 
-def cal_new_credit(customer_id, requested_budget, show= False):
+def cal_new_credit(customer_id, requested_budget, set_n= 100, show= False):
     customer_info = db.get_info_by_id(customer_id)
     
-    if customer_info['record_summary']['n'] < 30:
+    if customer_info['record_summary']['n'] < 30 or set_n < 30:
         if show: print('order less than 30')
         n_fin_record = len(customer_info['financial_info'])
         if n_fin_record == 0:
@@ -141,7 +143,9 @@ def cal_new_credit(customer_id, requested_budget, show= False):
             
             if show: print(i, ratio_of_liabilities_difference, new_credit_list)
         
-        Sf = np.mean(new_credit_list)
+        if len(new_credit_list) != 0: Sf = np.mean(new_credit_list)
+        else: Sf = 0
+            
     
     else:
         if show: print('order more than 30')
@@ -150,11 +154,13 @@ def cal_new_credit(customer_id, requested_budget, show= False):
         
         z = (requested_budget - mean) / std
         Sf = 850 - 20 * np.exp(1.65 * z)
+        Sf = min(max(Sf, 300), 850)
         
     return Sf
 
-def cal_FICO_current(customer_id, payment_info, requested_budget, show = False):
-    Score = 0.35 * (payment_his := cal_payment_his(payment_info)) + 0.3 * (amount_owed := cal_amount_owed(payment_info)) + 0.15 * (credit_history_lenght := cal_credit_history_lenght(customer_id)) + 0.1 * (credit_mix := cal_credit_mix(customer_id)) + 0.1 * (new_credit := cal_new_credit(customer_id, requested_budget))
+def cal_FICO_current(customer_id, payment_info, requested_budget, set_n= 100, show= False):
+    Score = 0.35 * (payment_his := cal_payment_his(payment_info)) + 0.3 * (amount_owed := cal_amount_owed(payment_info)) + 0.15 * (credit_history_lenght := cal_credit_history_lenght(customer_id)) + 0.1 * (credit_mix := cal_credit_mix(customer_id)) + 0.1 * (new_credit := cal_new_credit(customer_id, requested_budget, set_n= set_n))
+
     if show:
         print('>> payment_his:', payment_his)
         print('>> amount_owed:', amount_owed)
@@ -174,14 +180,6 @@ if __name__ == '__main__':
     P = PaymentInfo()
     P.JSON_to_PaymentInfo(test_customer['records'][0])
     # P.show()
-    
-
-    # print('>> payment_his:', cal_payment_his(P))
-    # print('>> amount_owed:', cal_amount_owed(P))
-    # print('>> credit_mix:', cal_credit_mix(customer_ID))
-    # print('>> credit_his_len:', cal_credit_history_lenght(customer_ID))
-    # print('>> new_credit:', cal_new_credit(customer_ID, requested_budget))
-    
     print('>>>>> FICO:', cal_FICO_current(customer_ID, P, requested_budget, show = True), '<<<<<')
     
     # print('credit mix:', cal_credit_mix('00007'))
