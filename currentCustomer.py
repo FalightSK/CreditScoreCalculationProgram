@@ -1,7 +1,8 @@
 import numpy as np
-from Script.customerInfo import PaymentInfo, FinancialInfo, extract_fin_info
+from Script.customerInfo import *
 import Script.databaseClient as db
 from datetime import datetime
+import pandas as pd
 
 # Score calculation
 def cal_payment_his(payment_info, credit_term= 15, show= False):
@@ -25,7 +26,7 @@ def cal_payment_his(payment_info, credit_term= 15, show= False):
     else:
         Sf = S0 * np.power(0.95, late_days)
     
-    return Sf
+    return max(min(Sf, 850), 300)
 
 def cal_amount_owed(payment_info, show= False):
     # Set Initial value
@@ -66,16 +67,17 @@ def cal_amount_owed(payment_info, show= False):
     S0 *= M
     
     # Final score cap
-    Sf = np.max([np.min([S0, 850]), 300])
+    Sf = max(min(S0, 850), 300)
     if show: print(f'> Delay Time: {delay_time}\n> Adjustment: {A}\n> Multiplier: {M}\n')
     return Sf
         
-def cal_credit_history_lenght(customer_id, show= False):
+def cal_credit_history_length(customer_id, show= False):
     n = db.get_number_of_order_by_id(customer_id)
     info = db.get_info_by_id(customer_id)
     
     # Freq
     customer_type = info['type']
+    print(customer_type)
     if customer_type == 'UNKNOWN':
         return 0
     criteria = db.get_criteria_credit_history(customer_type)
@@ -88,14 +90,16 @@ def cal_credit_history_lenght(customer_id, show= False):
     
     # Value
     val = 0
-    for data in info['records']:
+    for data_id, data in info['records'].items():
         val += data['amount']
     x = val//criteria[0]
     if show: print('x->', x)
     
     Sf_val = 300 + (x * 550/12)
     
-    return min([Sf_freq, Sf_val])
+    Sf = min([Sf_freq, Sf_val])
+    Sf = max(min(Sf, 850), 300)
+    return Sf
 
 def cal_credit_mix(customer_id, show= False):
     info = db.get_info_by_id(customer_id)['financial_info']
@@ -118,7 +122,7 @@ def cal_credit_mix(customer_id, show= False):
     credit_mix = (0.6 * credit_mix_ratio + 0.2 * debt_to_equity + 0.2 * debt_to_assets) * 550 + 300
     return credit_mix
 
-def cal_new_credit(customer_id, requested_budget, set_n= 100, show= False):
+def cal_new_credit(customer_id, requested_budget, payment_stat= "OVERDUE", set_n= 100, show= False):
     customer_info = db.get_info_by_id(customer_id)
     
     if customer_info['record_summary']['n'] < 30 or set_n < 30:
@@ -147,7 +151,6 @@ def cal_new_credit(customer_id, requested_budget, set_n= 100, show= False):
         if len(new_credit_list) != 0: Sf = np.mean(new_credit_list)
         else: Sf = 0
             
-    
     else:
         if show: print('order more than 30')
         mean = db.get_mean_by_id(customer_id)
@@ -156,20 +159,27 @@ def cal_new_credit(customer_id, requested_budget, set_n= 100, show= False):
         z = (requested_budget - mean) / std
         Sf = 850 - 20 * np.exp(1.65 * z)
         Sf = min(max(Sf, 300), 850)
+    
+    if payment_stat == 'FULL':
+        # P = requested_budget
+        # if P > mean: A = 18 * (np.exp(0.0001 * (P - mean)) - 1)
+        # A = 100 if A > 100 else A
+        # Sf += A 
+        Sf *= 1.5
         
-    return Sf
+    return max(min(Sf, 850), 300)
 
 def cal_FICO_current(customer_id, payment_info, requested_budget, set_n= 100, show= False):
-    Score = 0.35 * (payment_his := cal_payment_his(payment_info)) + 0.3 * (amount_owed := cal_amount_owed(payment_info)) + 0.15 * (credit_history_lenght := cal_credit_history_lenght(customer_id)) + 0.1 * (credit_mix := cal_credit_mix(customer_id)) + 0.1 * (new_credit := cal_new_credit(customer_id, requested_budget, set_n= set_n))
+    Score = 0.35 * (payment_his := cal_payment_his(payment_info)) + 0.3 * (amount_owed := cal_amount_owed(payment_info)) + 0.15 * (credit_history_length := cal_credit_history_length(customer_id)) + 0.1 * (credit_mix := cal_credit_mix(customer_id)) + 0.1 * (new_credit := cal_new_credit(customer_id, requested_budget, payment_stat= payment_info.stat, set_n= set_n))
 
     if show:
         print('>> payment_his:', payment_his)
         print('>> amount_owed:', amount_owed)
-        print('>> credit_his_len:', credit_history_lenght)
+        print('>> credit_his_len:', credit_history_length)
         print('>> credit_mix:', credit_mix)
         print('>> new_credit:', new_credit)
         
-    return Score
+    return Score, {'payment_his': payment_his, 'amount_owed': amount_owed, 'credit_his_len': credit_history_length, 'credit_mix': credit_mix, 'new_credit': new_credit}
 
 # Score retrieve
 def cal_final_FICO_score(customer_id, cal_duration= 185, show= False):
@@ -177,48 +187,162 @@ def cal_final_FICO_score(customer_id, cal_duration= 185, show= False):
     orders = info['records']
     
     FICO = []
-    for i, order in enumerate(orders):
+        
+    for i, (order_id, order) in enumerate(orders.items()):
         today = datetime.now()
         order_date = datetime(order['order_date'][2], order['order_date'][1], order['order_date'][0])
         day_dif = today - order_date
         
-        if show: print(i, order['ID'], day_dif, sep=' | ')
+        if show: print(i, order_id, day_dif, sep=' | ')
         if day_dif.days < cal_duration:
             FICO.append(order['local_credit_score'])
         else:
             break
+
     
     if show: print(f'{customer_id}: [{len(FICO)}] -> {FICO} >>>>> ', end='')
     if len(FICO) == 0: return 300
     return int(np.mean(FICO))
         
-def update_FICO_score(customer_id, cal_duration= 185, score= None):
+def update_FICO_score(customer_id, cal_duration= 185, score= None, score_info= None):
     if score is None:
         score = cal_final_FICO_score(customer_id, cal_duration= 185)
         
     db.update_credit_score(customer_id, score)
 
 def get_FICO_score(customer_id):
-    return db.get_info_by_id(customer_id)['credit_score']
+    try:
+        score = db.get_info_by_id(customer_id)['credit_score']
+        return score
+    except:
+        return 'User Does Not Exist'
+
+# Data base manipulation
+def add_new_order(customer_id, payment_info, show= False):
+    ### Add record
+    customer_info = db.get_info_by_id(customer_id)
+    # payment_info.show()
+    order = payment_info.PaymentInfo_to_JSON()
+    # print('order:', order)
+    
+    credit_score, credit_score_info = cal_FICO_current(customer_id, payment_info, payment_info.amount)
+    order['local_credit_score'] = credit_score
+    order['local_credit_score_info'] = credit_score_info
+    # print('credit score', credit_score)
+    
+    is_new_data = False
+    prev_stat = ''
+    if payment_info.ID in customer_info['records']:
+        prev_stat = customer_info['records'][payment_info.ID]['stat']
+        customer_info['records'][payment_info.ID] = order
+    else:
+        customer_info['records'] = {**{payment_info.ID: order}, **customer_info['records']}
+        is_new_data = True
+    print(customer_info)
+        
+    ###  Update summary
+    if payment_info.stat == 'FULL':
+        # print('FULL', payment_info.ID in customer_info['records'])
+        if not (not is_new_data and prev_stat == 'FULL'):
+            if show: print('summary updated')
+            data_list = []
+            for local_order in customer_info['records'].values():
+                if local_order['stat'] == 'FULL': data_list.append(local_order['amount'])
+            
+            customer_info['record_summary'] = {
+                "mean": np.mean(data_list),
+                "std": np.std(data_list),
+                "n": len(data_list)
+            }
+                
+                
+    ### Save new record to database
+    db.update_customer_info(customer_info)
+    update_FICO_score(customer_id)
+
+
+def add_list_new_order(order_list, show= False):
+    for customer_id, order in order_list:
+        if show:
+            print(f'{customer_id} -> {order.ID}')
+        add_new_order(customer_id, order)
+
+def request_new_budget(customer_id, requested_budget, cal_duration= 185, show= False):
+    info = db.get_info_by_id(customer_id)
+    if info is None:
+        return 'ERROR: User Does Not Exist'
+    
+    new_credit = cal_new_credit(customer_id, requested_budget)
+    print(new_credit)
+    
+    score = {'payment_his': [], 'amount_owed': [], 'credit_his_len': [], 'credit_mix': [], 'new_credit': []}
+    for order_id, order in info['records'].items():
+        today = datetime.now()
+        order_date = datetime(order['order_date'][2], order['order_date'][1], order['order_date'][0])
+        day_dif = today - order_date
+        
+        if show: print(order_id, day_dif, sep=' | ')
+        if day_dif.days < cal_duration:
+            score['payment_his'].append(order['local_credit_score_info']['payment_his'])
+            score['amount_owed'].append(order['local_credit_score_info']['amount_owed'])
+            score['credit_his_len'].append(order['local_credit_score_info']['credit_his_len'])
+            score['credit_mix'].append(order['local_credit_score_info']['credit_mix'])
+            score['new_credit'].append(order['local_credit_score_info']['new_credit'])
+        else:
+            break
+        
+        
+    if len(score['payment_his']) == 0:
+        Score = 0.1 * new_credit + 0.9 * info['credit_score']
+    else:
+        Score = 0.35 * np.mean(score['payment_his']) + 0.3 * np.mean(score['amount_owed']) + 0.15 * np.mean(score['credit_his_len']) + 0.1 * np.mean(score['credit_mix']) + 0.1 * new_credit
+
+    return Score
 
 if __name__ == '__main__':
-    customer_ID = '00001'
-    # 00027
+    customer_ID = 'TS0002'
+    #TS0002
+    
+    test_customer = db.get_info_by_id(customer_ID)
+    P = PaymentInfo()
+    P.JSON_to_PaymentInfo(test_customer['records'][list(test_customer['records'].keys())[0]])
+    # P.show()
+    
     
     ### Calculation test
     # requested_budget = 10000
-    
-    # test_customer = db.get_info_by_id(customer_ID)
-    
-    # P = PaymentInfo()
-    # P.JSON_to_PaymentInfo(test_customer['records'][0])
-    # P.show()
     # print('>>>>> FICO:', cal_FICO_current(customer_ID, P, requested_budget, show = True), '<<<<<')
 
     
     ### Data retrival test
-    print('FICO Score:', cal_final_FICO_score(customer_ID, show= True))
+    # print('FICO Score:', cal_final_FICO_score(customer_ID, show= True))
+    
+    
+    ### Add order
+    # P.ID = 'SO-202406721'
+    # P.amount = 20000
+    # P.stat = "FULL"
+    # add_new_order(customer_ID, P, show= True)
+    
+    
+    ### Add multiple orders
+    # path = r'D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Script\CreditScoreCalculationProgram\Script\testData\raw_data_for_fourth_test.xlsx'
+    # doc = read_order_file(path)
+    # payment_list = extract_order_info(doc)
+    # add_list_new_order(payment_list, show= True)
 
+    
+    ### Request new budget
+    requested_budget = 20000
+    print(f'Credit Score for requested {requested_budget} is {request_new_budget(customer_ID, requested_budget)}')
+    
+    
+    ### Check score
+    print(f'FICO socre of {customer_ID} is {get_FICO_score(customer_ID)}')
+    
+    
+    
+    
 
 
     

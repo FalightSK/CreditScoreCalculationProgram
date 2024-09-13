@@ -26,20 +26,11 @@ class FinancialInfo():
         JSON = {
             'total_assets': self.total_assets,
             'current_assets': self.current_assets,
-            'total_asstotal_liabilitiesets': self.total_liabilities,
+            'total_liabilities': self.total_liabilities,
             'total_revenue': self.total_revenue,
             'shareholder_equity': self.shareholder_equity
         }
         return JSON
-    
-    def FinancialInfo_to_DICT(self): 
-        return {
-            'total_assets': self.total_assets,
-            'current_assets': self.current_assets,
-            'total_liabilities': self.total_liabilities,
-            'total_revenue': self.total_revenue,
-            'shareholder_equity': self.shareholder_equity
-            }
     
     def copy(self):
         return copy.copy(self)
@@ -48,7 +39,8 @@ class PaymentInfo():
     method_list = ['CASH', 'IN_STORE', 'OTHERS', 'CREDIT_CARD']
     stat_list = ['FULL', 'PARTIAL', 'OVERDUE']
     
-    def __inti__(self):
+    def __init__(self):
+        self.ID = None
         self.stat = None
         self.order_date = None
         self.paid_date = None
@@ -56,6 +48,7 @@ class PaymentInfo():
         self.method = None
         
     def JSON_to_PaymentInfo(self, JSON):
+        self.ID = JSON['ID']
         self.stat = JSON['stat']
         self.amount = JSON['amount']
         self.method = JSON['method']
@@ -71,18 +64,25 @@ class PaymentInfo():
         
     def PaymentInfo_to_JSON(self):
         JSON = {
-            'stat': self.stat,
-            'amount': self.amount,
-            'method': self.method,
+            'ID': self.ID,
             'order_date': [self.order_date.day, self.order_date.month, self.order_date.year],
-            'paid_date': [self.paid_date.day, self.paid_date.month, self.paid_date.year]
+            'amount': self.amount,
+            'stat': self.stat,
+            'paid_date': None,
+            'method': self.method,
+            'local_credit_score': None
         }
+        
+        if self.paid_date is not None:
+            JSON['paid_date'] = [self.paid_date.day, self.paid_date.month, self.paid_date.year]
         
         return JSON
         
-    
     def show(self):
-        print(f'stat: {self.stat}\norder date: {self.order_date}\npaid_date: {self.paid_date}\namount: {self.amount}\nmethod: {self.method}')
+        print(f'>> {self.ID}:\nstat: {self.stat}\norder date: {self.order_date}\npaid_date: {self.paid_date}\namount: {self.amount}\nmethod: {self.method}')
+        
+    def copy(self):
+        return copy.copy(self)
 
 
 # Util Functions 
@@ -117,6 +117,53 @@ def extract_fin_info(doc_position, doc_income):
         
     return fin_info
 
+def read_order_file(path):
+    doc = pd.read_excel(path, header= 1)
+    doc.fillna('UNKNOWN', inplace= True)
+    return doc
+
+def extract_order_info(doc):
+    payment_list = []
+    
+    prev_order_id = ''
+    for order in doc.iloc():
+        order_id = order['รายการ']
+        if prev_order_id == order_id or order['สถานะรายการ'] != 'สำเร็จ' or order['มูลค่า'] in [0, 'UNKNOWN']:
+            continue
+        
+        
+        prev_order_id = order_id
+            
+        local_payment = PaymentInfo()
+        local_payment.ID = order_id
+        local_payment.amount = order['มูลค่า']
+        order_date = [int(j) for j in order['วันที่ทำรายการ'].split('/')]
+        local_payment.order_date = datetime.datetime(order_date[2], order_date[1], order_date[0])
+        
+        try:
+            paid_date = [int(j) for j in order['วันที่ชำระเงิน'].split()[0].split('/')]
+            local_payment.paid_date = datetime.datetime(paid_date[2], paid_date[1], paid_date[0])
+        except:
+            local_payment.paid_date = None
+        
+        local_stat = order['สถานะการชำระเงิน']
+        if local_stat == 'ชำระครบ':
+            local_stat = 'FULL'
+        elif local_stat == 'ชำระบางส่วน':
+            local_stat = 'PARTIAL'
+        elif local_stat == 'รอการชำระเงิน':
+            local_stat = 'OVERDUE'
+        else:
+            continue
+        local_payment.stat = local_stat
+        
+        local_method = order['ช่องทางการชำระเงิน'] 
+        local_payment.method = 'CASH' if local_method == 'เงินสด' else 'IN_STORE' if local_method == 'หน้าร้าน' else 'CREDIT_CARD' if local_method == "รอตัด" or local_method == "เครื่องรูดบัตร" else 'OTHERS'
+        
+        payment_list.append((order['รหัสลูกค้า'], local_payment.copy()))
+          
+    return payment_list
+
 
 # Data Structure
 order = {
@@ -126,7 +173,8 @@ order = {
     'stat': None,
     'paid_date': None,
     'method': None,
-    'local_credit_score': None
+    'local_credit_score': None,
+    'local_credit_score_info': None
 }
 
 user = {
@@ -147,7 +195,7 @@ user = {
         'std': None,
         'n': None
     }, 
-    'records': [order]
+    'records': order
 }
 
 summary = {

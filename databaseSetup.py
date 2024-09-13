@@ -44,7 +44,7 @@ def upload_data_struct():
                     'std': None,
                     'n': None
                 }, 
-                'records': []
+                'records': {}
             }
             
         if trans_id != prev_id:
@@ -75,7 +75,7 @@ def upload_data_struct():
             local_method = row['Payment Method'] 
             local_data['method'] = 'CASH' if local_method == 'เงินสด' else 'IN_STORE' if local_method == 'หน้าร้าน' else 'CREDIT_CARD' if local_method == "รอตัด" or local_method == "เครื่องรูดบัตร" else 'OTHERS'
             
-            users[customer_id]['records'].append(local_data)
+            users[customer_id]['records'][trans_id] = local_data
         
 
     users = dict(sorted(users.items()))
@@ -97,7 +97,7 @@ def upload_record_sum():
         value_list = []
         # print(key)
         
-        for order in val['records']:
+        for order_id, order in val['records'].items():
             # print(order)
             if order['stat'] == 'FULL': value_list.append(order['amount'])
             
@@ -214,15 +214,19 @@ def upload_local_credit_score():
         print('\n', val['customer_id'])
 
         n_record = len(val['records'])
-        for i_order in range(n_record-1, -1, -1):
-            order = val['records'][i_order]
+        for i_order, (order_id, order) in enumerate(val['records'].items()):
             requested_budget = order['amount']
             payment_info = PaymentInfo()
             payment_info.JSON_to_PaymentInfo(order)
             
-            FICO = round(cal_FICO_current(user, payment_info, requested_budget, set_n= n_record-i_order, show= False), 3)
-            database['history'][user]['records'][i_order]['local_credit_score'] = FICO
-            print(f'({i_order} - {FICO})', end=' ')
+            
+            FICO, FICO_info = cal_FICO_current(user, payment_info, requested_budget, set_n= n_record-i_order, show= False)
+            FICO = round(FICO, 3)
+            database['history'][user]['records'][order_id]['local_credit_score'] = FICO
+            database['history'][user]['records'][order_id]['local_credit_score_info'] = FICO_info
+            print(f'({n_record-i_order} - {FICO})', end=' ')
+            
+        
 
         # print(database['history'][user])
 
@@ -240,7 +244,7 @@ def upload_credit_score():
     database = db.read()
     
     for user, val in database['history'].items():
-        print(user)
+        # print(user)
         score = cal_final_FICO_score(user)
         
         if score == 300:
@@ -264,7 +268,7 @@ if __name__ == '__main__':
     # upload_record_sum()
     # upload_fin_record()
     # upload_cred_criteria()
-    # upload_local_credit_score()
-    upload_credit_score()
+    upload_local_credit_score()
+    # upload_credit_score()
     
-    # print(np.mean([3]))
+    pass

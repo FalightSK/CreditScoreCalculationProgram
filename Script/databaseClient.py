@@ -30,10 +30,14 @@ def get_mean_by_id(customer_id):
     return read()['history'][customer_id]['record_summary']['mean']
 
 def get_number_of_order_by_id(customer_id):
-    return read()['history'][customer_id]['record_summary']['n']
+    n = read()['history'][customer_id]['record_summary']['n']
+    n = n if n is not None else 0
+    return n
 
 def get_info_by_id(customer_id):
-    return read()['history'][customer_id]
+    data = read()['history']
+    if customer_id not in data: return None
+    else: return data[customer_id]
 
 
 
@@ -44,6 +48,12 @@ def update_credit_score(customer_id, score):
     save(database)
 
 def add_new_user(customer_info):
+    database = read()
+    
+    if customer_info['customer_id'] in database['history']: print(f'ERROR: user {customer_info["customer_id"]} already existed')
+    else: update_customer_info(customer_info)
+
+def update_customer_info(customer_info):
     database = read()
     database['history'][customer_info['customer_id']] = customer_info
     save(database)

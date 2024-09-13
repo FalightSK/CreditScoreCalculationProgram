@@ -63,7 +63,7 @@ def register_new_user(customer_id, customer_type, fin_info, show= False):
     
     fin_info_list = []
     for info in fin_info:
-        fin_info_list.append(info.FinancialInfo_to_DICT())
+        fin_info_list.append(info.FinancialInfo_to_JSON())
     
     new_user = {
         'customer_id': customer_id,
@@ -72,12 +72,12 @@ def register_new_user(customer_id, customer_type, fin_info, show= False):
         'credit_budget': 17000,
         'credit_terms': 15,
         'financial_info': fin_info_list,
-        'record_summary': {'mean': None, 'std': None, 'n': None }, 
-        'records': []
+        'record_summary': {'mean': None, 'std': None, 'n': 0 }, 
+        'records': {}
     }
     
     
-    if show: print(f'{fin_info_list} \n>>>>>>>>>>>>>>>>>>\n{new_user}')
+    if show: print(f'{fin_info_list} \n>>>>>>>>>>>>>>>>>>\n{new_user}\nAdding new user ...')
     db.add_new_user(new_user)
     
     
@@ -89,7 +89,7 @@ if __name__ == '__main__':
     fin_info = extract_fin_info(doc_finan_position, doc_income_statement)
     
     # FICO_cal(fin_info, show= True)
-    register_new_user('TS0001', 'Tyre Shop', fin_info, True)
+    register_new_user('TS0002', 'Tyre Shop', fin_info, True)
     
     
 
