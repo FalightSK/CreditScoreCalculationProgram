@@ -77,7 +77,7 @@ def cal_credit_history_length(customer_id, show= False):
     
     # Freq
     customer_type = info['type']
-    print(customer_type)
+    # print(customer_type)
     if customer_type == 'UNKNOWN':
         return 0
     criteria = db.get_criteria_credit_history(customer_type)

@@ -268,7 +268,7 @@ if __name__ == '__main__':
     # upload_record_sum()
     # upload_fin_record()
     # upload_cred_criteria()
-    upload_local_credit_score()
-    # upload_credit_score()
+    # upload_local_credit_score()
+    upload_credit_score()
     
     pass
