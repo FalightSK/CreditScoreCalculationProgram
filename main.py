@@ -1,5 +1,4 @@
 import os
-import random
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from tkinter import filedialog
@@ -26,6 +25,17 @@ def upload_income_statement():
         file_name = os.path.basename(income_statement_path)
         label_income_statement.config(text=f"{file_name}")
 
+# Function to determine rating and color symbol based on credit score
+def get_rating_and_color(credit_score):
+    if credit_score >= 740:
+        return "Very Good", "success",  "Very Good ✅"
+    elif credit_score >= 670:
+        return "Good", "warning", "Good 👍"
+    elif credit_score >= 580:
+        return "Fair", "warning", "Fair ⚠️"
+    else:
+        return "Poor", "danger", "Poor ❌"
+
 # Placeholder function for submitting files and moving to the credit score page
 def submit_files():
     customer_name = name_entry.get()
@@ -39,13 +49,11 @@ def submit_files():
         # Update the meter and labels on the credit score page
         credit_meter.configure(amountused=credit_score)
         
-        if credit_score >= 740:
-            credit_meter.configure(bootstyle="success")
-        elif credit_score >= 580:
-            credit_meter.configure(bootstyle="warning")
-        else:
-            credit_meter.configure(bootstyle="danger")
+        # Update the meter color and description based on the score
+        credit_meter.configure(bootstyle=get_rating_and_color(credit_score)[1])
+        label_credit_confidence.config(text=get_rating_and_color(credit_score)[0], bootstyle=get_rating_and_color(credit_score)[1])
         
+        # Update the customer name and type labels
         label_credit_score_name.config(text=f"Customer ID: {customer_name}")
         label_credit_score_id.config(text=f"Customer Type: {customer_id}")
         
@@ -57,7 +65,7 @@ def submit_files():
 # Create the main window
 root = ttk.Window(themename="superhero")  # Using the dark superhero theme
 root.title("MAXXIS Credit Score Manager")
-root.geometry("700x600")  # Window size set to 700x600
+root.geometry("1250x700")
 root.config(padx=20, pady=20)
 
 # Define the frame container
@@ -79,19 +87,14 @@ style = ttk.Style()
 
 # Match predefined colors with exact ttkbootstrap styles
 style.configure('custom-danger.TButton', background='#dc3545', foreground='white', font=('Segoe UI', 12), anchor='center')
-style.map('custom-danger.TButton', foreground=[('pressed', 'white'), ('active', 'white')], background=[('pressed', '#bd2130'), ('active', '#dc3545')])
-
 style.configure('custom-success.TButton', background='#28a745', foreground='white', font=('Segoe UI', 12), anchor='center')
-style.map('custom-success.TButton', foreground=[('pressed', 'white'), ('active', 'white')], background=[('pressed', '#218838'), ('active', '#28a745')])
-
 style.configure('custom-info.TButton', background='#17a2b8', foreground='white', font=('Segoe UI', 12), anchor='center')
-style.map('custom-info.TButton', foreground=[('pressed', 'white'), ('active', 'white')], background=[('pressed', '#117a8b'), ('active', '#17a2b8')])
 
 # Placeholder variables for file paths
 financial_position_path = ""
 income_statement_path = ""
 
-### LANDING PAGE ###
+################# LANDING PAGE #################
 landing_page = ttk.Frame(container)
 landing_page.grid(row=0, column=0, sticky="nsew")
 
@@ -115,20 +118,18 @@ btn_to_main.grid(row=0, column=0, padx=10, pady=10)
 btn_register = ttk.Button(btn_frame, text="Register New User", command=lambda: show_frame(new_user_page),
                           style="custom-info.TButton", width=20)
 btn_register.grid(row=0, column=1, padx=10, pady=10)
+################# ################# #################
 
-### NEW USER PAGE ###
+################# NEW USER PAGE #################
 new_user_page = ttk.Frame(container)
 new_user_page.grid(row=0, column=0, sticky="nsew")
-
 new_user_title = ttk.Label(new_user_page, text="New User Registration", font=custom_font_large, bootstyle="primary")
 new_user_title.pack(pady=20)
-
 # Input field for Customer ID
 name_label = ttk.Label(new_user_page, text="Customer ID:", font=custom_font_medium)
 name_label.pack(pady=5)
 name_entry = ttk.Entry(new_user_page, font=custom_font_medium, width=40)
 name_entry.pack(pady=5)
-
 # Input field for Customer Type
 id_label = ttk.Label(new_user_page, text="Customer Type:", font=custom_font_medium)
 id_label.pack(pady=5)
@@ -138,13 +139,11 @@ id_entry.pack(pady=5)
 # File upload forms placed in the same row
 file_frame = ttk.Frame(new_user_page)
 file_frame.pack(pady=10)
-
 # File upload for Financial Position (left side)
 label_financial_position = ttk.Label(file_frame, text="No file uploaded", font=custom_font_medium)
 label_financial_position.grid(row=0, column=0, padx=10, pady=5)
 btn_financial_position = ttk.Button(file_frame, text="Upload Financial Position", command=upload_financial_position, style="custom-info.TButton", width=20)
 btn_financial_position.grid(row=1, column=0, padx=10, pady=5)
-
 # File upload for Income Statement (right side)
 label_income_statement = ttk.Label(file_frame, text="No file uploaded", font=custom_font_medium)
 label_income_statement.grid(row=0, column=1, padx=10, pady=5)
@@ -154,24 +153,84 @@ btn_income_statement.grid(row=1, column=1, padx=10, pady=5)
 # Submit Files Button
 btn_submit_files = ttk.Button(new_user_page, text="Submit Files", command=submit_files, style="custom-success.TButton", width=20)
 btn_submit_files.pack(pady=20)
-
 # Back Button
-btn_back_to_landing = ttk.Button(new_user_page, text="Back to Landing Page", command=lambda: show_frame(landing_page),
-                                 style="custom-danger.TButton", width=20)
+btn_back_to_landing = ttk.Button(new_user_page, text="Back to Landing Page", command=lambda: show_frame(landing_page), style="custom-danger.TButton", width=20)
 btn_back_to_landing.pack(pady=20)
+################# ################# #################
 
-### MAIN PAGE (Mockup for now) ###
+################# MAIN PAGE (Mockup for now) #################
+from mockup import mock_data
+
 main_page = ttk.Frame(container)
 main_page.grid(row=0, column=0, sticky="nsew")
 
-main_page_title = ttk.Label(main_page, text="Main Application Page (Mockup)", font=custom_font_large, bootstyle="primary")
-main_page_title.pack(pady=50)
+# Title for the main page
+main_page_title = ttk.Label(main_page, text="Customer Overview", font=("Segoe UI", 24, "bold"), bootstyle="primary")
+main_page_title.pack(pady=20)
 
+# Search and Filter section
+search_filter_frame = ttk.Frame(main_page)
+search_filter_frame.pack(pady=10, fill="x")
+
+# Search bar
+search_label = ttk.Label(search_filter_frame, text="Search:", font=("Segoe UI", 12))
+search_label.pack(side="left", padx=5)
+search_entry = ttk.Entry(search_filter_frame, font=("Segoe UI", 12), width=30)
+search_entry.pack(side="left", padx=5)
+
+# Filter dropdown
+filter_label = ttk.Label(search_filter_frame, text="Filter by Type:", font=("Segoe UI", 12))
+filter_label.pack(side="left", padx=20)
+filter_combobox = ttk.Combobox(search_filter_frame, values=["All", "Tyre Shop"], font=("Segoe UI", 12), width=15)
+filter_combobox.current(0)  # Set default to "All"
+filter_combobox.pack(side="left", padx=5)
+
+# Table (Treeview) to display customer data
+columns = ("customer_id", "type", "credit_budget", "credit_terms", "credit_score", "rating")
+
+customer_table = ttk.Treeview(main_page, columns=columns, show="headings", height=10)
+customer_table.pack(pady=20, fill="both", expand=True)
+
+# Define the headings
+customer_table.heading("customer_id", text="Customer ID")
+customer_table.heading("type", text="Type")
+customer_table.heading("credit_budget", text="Credit Budget")
+customer_table.heading("credit_terms", text="Credit Terms")
+customer_table.heading("credit_score", text="Credit Score")
+customer_table.heading("rating", text="Rating")
+
+# Define tags for row colors based on credit score
+customer_table.tag_configure("success", foreground="green")
+customer_table.tag_configure("warning", foreground="orange")
+customer_table.tag_configure("danger", foreground="red")
+
+# Define alternating row background colors
+customer_table.tag_configure("evenrow", background="#1E1E2F")
+customer_table.tag_configure("oddrow", background="#2A2A40")
+
+# Add data to the table with color-coded emoticons and alternating row colors
+row_num = 0
+for customer in mock_data.values():
+    color, tag, emoticon = get_rating_and_color(customer["credit_score"])
+    row_tag = "evenrow" if row_num % 2 == 0 else "oddrow"
+    
+    customer_table.insert("", "end", values=(
+        customer["customer_id"],
+        customer["type"],
+        customer["credit_budget"],
+        customer["credit_terms"],
+        customer["credit_score"],
+        emoticon  # Insert emoticon in place of plain text rating
+    ), tags=(tag, row_tag))
+    
+    row_num += 1
+
+# Back Button to go to the landing page
 btn_back_to_landing_main = ttk.Button(main_page, text="Back to Landing Page", command=lambda: show_frame(landing_page),
                                       style="custom-danger.TButton", width=20)
 btn_back_to_landing_main.pack(pady=20)
 
-### CREDIT SCORE PAGE ###
+################# CREDIT SCORE PAGE #################
 credit_score_page = ttk.Frame(container)
 credit_score_page.grid(row=0, column=0, sticky="nsew")
 
@@ -185,15 +244,28 @@ label_credit_score_name.pack(pady=5)
 label_credit_score_id = ttk.Label(credit_score_page, text="Customer Type:", font=custom_font_medium)
 label_credit_score_id.pack(pady=5)
 
-# Credit Score Meter
+# Horizontal container for "Rating" and Confidence Level on the same row
+rating_frame = ttk.Frame(credit_score_page)
+rating_frame.pack(pady=5)
+
+# Add the white "Rating" label on the left
+label_rating_title = ttk.Label(rating_frame, text="Rating:", font=("Segoe UI", 14, "bold"), bootstyle="light")
+label_rating_title.pack(side="left", padx=5)
+
+# Confidence level label next to "Rating"
+label_credit_confidence = ttk.Label(rating_frame, text="", font=("Segoe UI", 16, "bold"))
+label_credit_confidence.pack(side="left", padx=5)
+
+# Credit Score Meter (now placed after the Rating/Confidence row)
 credit_meter = ttk.Meter(credit_score_page, bootstyle="success", subtext="Credit Score", interactive=False, amounttotal=850,
                          meterthickness=20, textright='/ 850', arcrange=200, arcoffset=-190)
-credit_meter.pack(pady=20)
+credit_meter.pack(pady=5)
 
 # Add Return Button to go back to Landing Page
 btn_return_to_landing = ttk.Button(credit_score_page, text="Return to Landing Page", command=lambda: show_frame(landing_page),
                                    style="custom-danger.TButton", width=20)
 btn_return_to_landing.pack(pady=10)
+################# ################# #################
 
 # Start with the landing page
 show_frame(landing_page)
