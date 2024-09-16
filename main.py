@@ -98,6 +98,46 @@ btn_register = ttk.Button(btn_frame, text="Register New User", command=lambda: s
 btn_register.grid(row=0, column=1, padx=10, pady=10)
 ################# ################# #################
 
+################# LOADING PAGE #################
+import threading
+# Thyphoon API
+from Script.typhoonClient import get_explanation
+
+def show_loading_screen():
+    
+    if financial_position_path and income_statement_path:
+        customer_id = id_entry.get()
+
+        loading_frame.tkraise()
+        progress_bar.start()
+
+        api_thread = threading.Thread(target=lambda: handle_api_call(customer_id))
+        api_thread.start()
+    else:
+        print("Please upload both file")
+    
+def handle_api_call(customer_id):
+    response = get_explanation(customer_id)
+    root.after(0, update_after_api_response, response)
+    
+def update_after_api_response(response):
+    progress_bar.stop()
+    text_box.insert("end", response)
+    submit_files()
+    
+loading_frame = ttk.Frame(container)
+loading_frame.grid(row=0, column=0, sticky="nsew")
+
+loading_frame_content = ttk.Frame(loading_frame)
+loading_frame_content.place(relx=0.5, rely=0.5, anchor="center")
+
+loading_label = ttk.Label(loading_frame_content, text="Calculating, please wait...", font=custom_font_large)
+loading_label.pack(pady=10)
+
+progress_bar = ttk.Progressbar(loading_frame_content, mode="indeterminate", bootstyle="info", length=200)
+progress_bar.pack(pady=10)
+################# ################# #################
+
 ################# NEW USER PAGE #################
 # Placeholder function for submitting files and moving to the credit score page
 def submit_files():
@@ -127,21 +167,25 @@ def submit_files():
 
 new_user_page = ttk.Frame(container)
 new_user_page.grid(row=0, column=0, sticky="nsew")
-new_user_title = ttk.Label(new_user_page, text="New User Registration", font=custom_font_large, bootstyle="primary")
+
+new_user_page_content = ttk.Frame(new_user_page)
+new_user_page_content.place(relx=0.5, rely=0.5, anchor="center")
+
+new_user_title = ttk.Label(new_user_page_content, text="New User Registration", font=custom_font_large, bootstyle="primary")
 new_user_title.pack(pady=20)
 # Input field for Customer ID
-name_label = ttk.Label(new_user_page, text="Customer ID:", font=custom_font_medium)
+name_label = ttk.Label(new_user_page_content, text="Customer ID:", font=custom_font_medium)
 name_label.pack(pady=5)
-id_entry = ttk.Entry(new_user_page, font=custom_font_medium, width=40)
+id_entry = ttk.Entry(new_user_page_content, font=custom_font_medium, width=40)
 id_entry.pack(pady=5)
 # Input field for Customer Type
-id_label = ttk.Label(new_user_page, text="Customer Type:", font=custom_font_medium)
+id_label = ttk.Label(new_user_page_content, text="Customer Type:", font=custom_font_medium)
 id_label.pack(pady=5)
-type_entry = ttk.Entry(new_user_page, font=custom_font_medium, width=40)
+type_entry = ttk.Entry(new_user_page_content, font=custom_font_medium, width=40)
 type_entry.pack(pady=5)
 
 # File upload forms placed in the same row
-file_frame = ttk.Frame(new_user_page)
+file_frame = ttk.Frame(new_user_page_content)
 file_frame.pack(pady=10)
 # File upload for Financial Position (left side)
 label_financial_position = ttk.Label(file_frame, text="No file uploaded", font=custom_font_medium)
@@ -155,10 +199,10 @@ btn_income_statement = ttk.Button(file_frame, text="Upload Income Statement", co
 btn_income_statement.grid(row=1, column=1, padx=10, pady=5)
 
 # Submit Files Button
-btn_submit_files = ttk.Button(new_user_page, text="Submit Files", command=submit_files, style="custom-success.TButton", width=20)
+btn_submit_files = ttk.Button(new_user_page_content, text="Submit Files", command=show_loading_screen, style="custom-success.TButton", width=20)
 btn_submit_files.pack(pady=20)
 # Back Button
-btn_back_to_landing = ttk.Button(new_user_page, text="Back to Landing Page", command=lambda: show_frame(landing_page), style="custom-danger.TButton", width=20)
+btn_back_to_landing = ttk.Button(new_user_page_content, text="Back to Landing Page", command=lambda: show_frame(landing_page), style="custom-danger.TButton", width=20)
 btn_back_to_landing.pack(pady=20)
 ################# ################# #################
 
@@ -331,6 +375,10 @@ btn_back_to_landing_main = ttk.Button(main_page, text="Back to Landing Page", co
 btn_back_to_landing_main.pack(pady=20)
 
 ################# CREDIT SCORE PAGE #################
+def reset_credit_cache():
+    text_box.delete("1.0", 'end')
+    show_frame(landing_page)
+
 credit_score_page = ttk.Frame(container)
 credit_score_page.grid(row=0, column=0, sticky="nsew")
 
@@ -350,9 +398,9 @@ meter_group_container = ttk.Frame(meter_text_subcontainer)
 meter_group_container.pack(fill="y", pady=5, padx=20, side="left")
 
 # Customer Type and ID Labels
-label_credit_score_name = ttk.Label(meter_group_container, text="Customer ID:", font=custom_font_medium)
+label_credit_score_name = ttk.Label(meter_group_container, text="Customer ID:", font=("Segoe UI", 14, "bold"))
 label_credit_score_name.pack(pady=5)
-label_credit_score_id = ttk.Label(meter_group_container, text="Customer Type:", font=custom_font_medium)
+label_credit_score_id = ttk.Label(meter_group_container, text="Customer Type:", font=("Segoe UI", 14, "bold"))
 label_credit_score_id.pack(pady=5)
 
 # Horizontal container for "Rating" and Confidence Level on the same row
@@ -376,8 +424,11 @@ credit_meter.pack(pady=5)
 text_box_frame = ttk.Frame(meter_text_subcontainer)
 text_box_frame.pack(pady=5, padx=20, side="right")
 
+explaination_label = ttk.Label(text_box_frame, font=("Segoe UI", 14, "bold"), text="Analytical detail:")
+explaination_label.pack(side="top", fill="y")
+
 # Create the Text box
-text_box = ttk.Text(text_box_frame, wrap="word", height=20, width=50)
+text_box = ttk.Text(text_box_frame, wrap="word", height=17, width=50, font=("Segoe UI", 10))
 text_box.pack(side="left", fill="y")
 
 # Create a Scrollbar and link it to the Text box
@@ -385,10 +436,8 @@ scrollbar = ttk.Scrollbar(text_box_frame, orient="vertical", command=text_box.yv
 scrollbar.pack(side="right", fill="y")
 text_box.config(yscrollcommand=scrollbar.set)
 
-text_box.insert("end", "This is a placeholder text. You can provide details about the customer's credit score or financial status here.")
-
 # Add Return Button to go back to Landing Page
-btn_return_to_landing = ttk.Button(credit_score_content, text="Return to Landing Page", command=lambda: show_frame(landing_page),
+btn_return_to_landing = ttk.Button(credit_score_content, text="Return to Landing Page", command=lambda: reset_credit_cache(),
                                    style="custom-danger.TButton", width=20)
 btn_return_to_landing.pack(pady=10)
 ################# ################# #################

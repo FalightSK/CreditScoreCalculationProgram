@@ -1,5 +1,5 @@
 from openai import OpenAI
-import databaseClient as db
+from .databaseClient import get_info_by_id
 import os
 
 ### Setup
@@ -16,7 +16,7 @@ with open(path, 'r', encoding= 'utf-8') as file:
 
 ### Utilities function
 def read_customer_info(customer_id):
-    info = db.get_info_by_id(customer_id)
+    info = get_info_by_id(customer_id)
     msg = f"ลูกค่าหมายเลข {info['customer_id']} เป็นลูกค้าชนิด {info['type']} มี credit score อยู่ที่ {info['credit_score']}"
     
     if len(info['financial_info']) != 0:
