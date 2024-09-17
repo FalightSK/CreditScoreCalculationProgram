@@ -254,11 +254,67 @@ def on_row_click(event):
     item = customer_table.selection()[0]
     print(customer_table.item(item, "values"))
 
+import currentCustomer
+from Script.customerInfo import *
 def update_credit_score():
-    pass
+    filepath = filedialog.askopenfilename(filetypes=[("Excel files", "*.xlsx"), ("CSV files", "*.csv"), ("All files", "*.*")])
+    if filepath:
+        doc = read_order_file(filepath)
+        order_list = extract_order_info(doc)
+        currentCustomer.add_list_new_order(order_list)
+        craete_table()
+    else:
+        print("Please Upload file")
 
 def request_budget():
     pass
+
+def request_budget_modal():
+    # Create a new Toplevel window (modal)
+    modal = ttk.Toplevel(root)
+    modal.title("Request Budget")
+    modal.geometry("500x400")
+    
+    # Center the modal on the screen
+    modal.geometry("+%d+%d" % (root.winfo_screenwidth() // 2 - 150, root.winfo_screenheight() // 2 - 100))
+
+    # Prevent interaction with the main window
+    modal.grab_set()
+    
+    # Center component
+    centering_frame = ttk.Frame(modal)
+    centering_frame.place(relx=0.5, rely=0.5, anchor="center")
+
+    # Add some content to the modal
+    label = ttk.Label(centering_frame, text="Budget Request Form", font=("Segoe UI", 14, "bold"), bootstyle="primary")
+    label.pack(pady=20)
+    
+    request_id_frame = ttk.Frame(centering_frame)
+    request_id_frame.pack(pady=10, fill="x")
+
+    id_label = ttk.Label(request_id_frame, text="Customer ID: ", font=("Segoe UI", 12))
+    id_label.pack(side="left", padx=5)
+    id_entry = ttk.Entry(request_id_frame, font=("Segoe UI", 12), width=30)
+    id_entry.pack(side="left", padx=5)
+    
+    request_bud_frame = ttk.Frame(centering_frame)
+    request_bud_frame.pack(pady=10, fill="x")
+
+    bud_label = ttk.Label(request_bud_frame, text="Budget (THB):", font=("Segoe UI", 12))
+    bud_label.pack(side="left", padx=5)
+    bud_entry = ttk.Entry(request_bud_frame, font=("Segoe UI", 12), width=30)
+    bud_entry.pack(side="left", padx=5)
+
+    # Button to submit the form
+    submit_button = ttk.Button(centering_frame, text="submit", bootstyle="success", command=request_budget)
+    submit_button.pack(pady=10)
+    
+    # Button to close the modal
+    close_button = ttk.Button(centering_frame, text="Close", bootstyle="danger", command=modal.destroy)
+    close_button.pack(pady=10)
+
+    # Block interaction with the main window until the modal is closed
+    modal.wait_window()
 
 def reset_page(page_change: bool = False):
     search_entry.delete(0, 'end')
@@ -364,7 +420,7 @@ update_button = ttk.Button(summary_container, text="Update Credit Score", comman
 update_button.pack(side="right", padx=10, pady=10)
 
 # "Request Budget" button
-request_budget_button = ttk.Button(summary_container, text="Request Budget", command=request_budget, bootstyle="primary", width=20)
+request_budget_button = ttk.Button(summary_container, text="Request Budget", command=request_budget_modal, bootstyle="primary", width=20)
 request_budget_button.pack(side="right", padx=10, pady=10)
 
 craete_table()
