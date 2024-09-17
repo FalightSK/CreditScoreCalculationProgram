@@ -103,22 +103,35 @@ import threading
 # Thyphoon API
 from Script.typhoonClient import get_explanation
 
-def show_loading_screen():
-    
-    if financial_position_path and income_statement_path:
-        customer_id = id_entry.get()
+def show_loading_screen(NewBud: bool = False, cusID: str = None, Budreq: float = 0, score: float = 0):
+    if not NewBud:
+        if financial_position_path and income_statement_path:
+            customer_id = id_entry.get()
 
-        loading_frame.tkraise()
-        progress_bar.start()
+            loading_frame.tkraise()
+            progress_bar.start()
 
-        api_thread = threading.Thread(target=lambda: handle_api_call(customer_id))
-        api_thread.start()
+            api_thread = threading.Thread(target=lambda: handle_api_call(customer_id))
+            api_thread.start()
+        else:
+            print("Please upload both file")
     else:
-        print("Please upload both file")
+        if cusID:
+            loading_frame.tkraise()
+            progress_bar.start()
+
+            api_thread = threading.Thread(target=lambda: handle_api_call(cusID, NewBud, Budreq, score))
+            api_thread.start()
+        else:
+            print("Please input user's ID")
     
-def handle_api_call(customer_id):
+def handle_api_call(customer_id, NewBud: bool = False, Budreq: float = 0, score: float = 0):
     response = get_explanation(customer_id)
-    root.after(0, update_after_api_response, response)
+    if not NewBud:
+        root.after(0, update_after_api_response, response)
+    else:
+        root.after(0, update_after_req_api, response, customer_id, Budreq, score)
+        pass
     
 def update_after_api_response(response):
     progress_bar.stop()
@@ -159,6 +172,9 @@ def submit_files():
         # Update the customer name and type labels
         label_credit_score_name.config(text=f"Customer ID: {customer_id}")
         label_credit_score_id.config(text=f"Customer Type: {customer_type}")
+        
+        label_budget_value.config(text="17000" + " THB")
+        label_term_value.config(text="15" + " Days")
         
         # Switch to the credit score page
         show_frame(credit_score_page)
@@ -266,8 +282,35 @@ def update_credit_score():
     else:
         print("Please Upload file")
 
-def request_budget():
-    pass
+def show_req_analysis(cusID, budReq, score):
+    # Update the meter and labels on the credit score page
+    credit_meter.configure(amountused=int(score))
+    
+    # Update the meter color and description based on the score
+    credit_meter.configure(bootstyle=get_rating_and_color(score)[1])
+    label_credit_confidence.config(text=get_rating_and_color(score)[0], bootstyle=get_rating_and_color(score)[1])
+    
+    temp = db.get_info_by_id(cusID)
+    
+    # Update the customer name and type labels
+    label_credit_score_name.config(text=f"Customer ID: {cusID}")
+    label_credit_score_id.config(text=f"Customer Type: {temp['type']}")
+    
+    label_budget_value.config(text=str(int(budReq)) + " THB")
+    label_term_value.config(text=str(int(temp["credit_terms"])) + " Days")
+    
+    # Switch to the credit score page
+    show_frame(credit_score_page)
+
+def update_after_req_api(response, customer_id, Budreq, score):
+    progress_bar.stop()
+    text_box.insert("end", response)
+    show_req_analysis(customer_id, Budreq, score)   
+
+def request_budget(modal, cusID, budReq):
+    modal.destroy()
+    score = currentCustomer.request_new_budget(cusID, float(budReq))
+    show_loading_screen(NewBud=True, cusID=cusID, Budreq=float(budReq), score=score)
 
 def request_budget_modal():
     # Create a new Toplevel window (modal)
@@ -306,7 +349,7 @@ def request_budget_modal():
     bud_entry.pack(side="left", padx=5)
 
     # Button to submit the form
-    submit_button = ttk.Button(centering_frame, text="submit", bootstyle="success", command=request_budget)
+    submit_button = ttk.Button(centering_frame, text="submit", bootstyle="success", command=lambda: request_budget(modal, id_entry.get(), bud_entry.get()))
     submit_button.pack(pady=10)
     
     # Button to close the modal
@@ -314,7 +357,7 @@ def request_budget_modal():
     close_button.pack(pady=10)
 
     # Block interaction with the main window until the modal is closed
-    modal.wait_window()
+    # modal.wait_window()
 
 def reset_page(page_change: bool = False):
     search_entry.delete(0, 'end')
@@ -475,6 +518,27 @@ label_credit_confidence.pack(side="left", padx=5)
 credit_meter = ttk.Meter(meter_group_container, bootstyle="success", subtext="Credit Score", interactive=False, amounttotal=850,
                          meterthickness=20, metersize=250, textright='/ 850', arcrange=200, arcoffset=-190)
 credit_meter.pack(pady=5)
+
+# Display Credit term and budget
+big_tb_frame = ttk.Frame(meter_group_container)
+big_tb_frame.pack()
+big_tb_frame.place(rely=0.75)
+
+budget_frame = ttk.Frame(big_tb_frame)
+budget_frame.pack(pady=5)
+
+label_budget = ttk.Label(budget_frame, text="Credit Value:", font=("Segoe UI", 14, "bold"), bootstyle="light")
+label_budget.pack(side="left", padx=5)
+label_budget_value = ttk.Label(budget_frame, text="", font=("Segoe UI", 14, "bold"), bootstyle="info")
+label_budget_value.pack(side="left", padx=5)
+
+term_frame = ttk.Frame(big_tb_frame)
+term_frame.pack(pady=5)
+
+label_term = ttk.Label(term_frame, text="Credit Term:", font=("Segoe UI", 14, "bold"), bootstyle="light")
+label_term.pack(side="left", padx=5)
+label_term_value = ttk.Label(term_frame, text="", font=("Segoe UI", 14, "bold"), bootstyle="info")
+label_term_value.pack(side="left", padx=5)
 
 # Create a frame for the text box and the scrollbar
 text_box_frame = ttk.Frame(meter_text_subcontainer)
