@@ -195,7 +195,8 @@ user = {
         'std': None,
         'n': None
     }, 
-    'records': order
+    'records': order,
+    'explanation': None
 }
 
 summary = {

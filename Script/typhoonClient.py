@@ -1,5 +1,5 @@
 from openai import OpenAI
-from databaseClient import get_info_by_id
+from databaseClient import get_info_by_id, update_explanation
 import os
 
 ### Setup
@@ -71,7 +71,11 @@ def get_explanation(customer_id, index= 0, new_FICO= None, request_budget= None)
         top_p= 0.9,
     )
     # print(chat_completion.choices[0].message.content)
-    return chat_completion.choices[0].message.content
+    explanation = chat_completion.choices[0].message.content
+    print(new_FICO)
+    if new_FICO is None:
+        update_explanation(custom_ID, explanation)
+    return explanation
 
 if __name__ == '__main__':
     custom_ID = '00008'

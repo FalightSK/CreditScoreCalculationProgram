@@ -7,12 +7,12 @@ path = os.path.join(Dir, path)
 
 # JSON utilities
 def save(json_file, path= path):
-    with open(path, 'w') as file:
+    with open(path, 'w', encoding= 'utf-8') as file:
         json.dump(json_file, file)
     print('save success')
     
 def read(path= path):
-    with open(path, 'r') as file:
+    with open(path, 'r', encoding= 'utf-8') as file:
         data = json.load(file)
         return data
     
@@ -57,10 +57,18 @@ def update_customer_info(customer_info):
     database = read()
     database['history'][customer_info['customer_id']] = customer_info
     save(database)
+
+def update_explanation(customer_id, explanation):
+    info = read()
+    info['history'][customer_id]['explanation'] = explanation
+    
+    save(info)
     
 
 if __name__ == '__main__':
+    print(read()['history']['00008']['records'])
     pass
+
     # save({'test': 'helloworld!!!'})
     # print(get_mean_by_id('00001'))
     
