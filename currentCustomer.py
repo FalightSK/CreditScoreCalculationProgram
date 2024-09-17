@@ -300,7 +300,7 @@ def request_new_budget(customer_id, requested_budget, cal_duration= 185, show= F
     return Score
 
 if __name__ == '__main__':
-    customer_ID = 'TS0002'
+    customer_ID = '00032'
     #TS0002
     
     test_customer = db.get_info_by_id(customer_ID)
@@ -333,8 +333,8 @@ if __name__ == '__main__':
 
     
     ### Request new budget
-    requested_budget = 20000
-    print(f'Credit Score for requested {requested_budget} is {request_new_budget(customer_ID, requested_budget)}')
+    requested_budget = 40000
+    print(f'Credit Score for requested {requested_budget} is {request_new_budget(customer_ID, requested_budget, show = True)}')
     
     
     ### Check score
