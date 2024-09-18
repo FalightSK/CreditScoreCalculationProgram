@@ -34,12 +34,19 @@ def cal_credit_values(customer_id, credit_score= None, show= False):
     if credit_score is None: credit_score = info['credit_score']
     
     order_list = []
-    for order in info['records'].values():
-        order_list.append(order['amount'])
-    mean_order = np.mean(order_list)
+    try:
+        for order in info['records'].values():
+            order_list.append(order['amount'])
+        if len(order_list) == 0:
+            mean_order = 17000
+        else:
+            mean_order = np.mean(order_list)
+    except:
+        mean_order = 17000
     
-    fac = 1.7 * (credit_score - 490) / 360
+    fac = (credit_score - 490) / 360
     fac = 0 if fac < 0 else fac
+    # print(fac, mean_order)
     
     credit_terms = 7 + 14 * fac
     

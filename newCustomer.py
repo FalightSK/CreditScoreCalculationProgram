@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from Script.customerInfo import FinancialInfo, extract_fin_info, read_financial_file, user
 import Script.databaseClient as db
+from Script.credit_cal import cal_credit_values
 
 
 
@@ -65,32 +66,33 @@ def register_new_user(customer_id, customer_type, fin_info, show= False):
     for info in fin_info:
         fin_info_list.append(info.FinancialInfo_to_JSON())
     
+    credit_budget, credit_terms = cal_credit_values(customer_id, credit_score, True)
     new_user = {
         'customer_id': customer_id,
         'type': customer_type,
         'credit_score': credit_score,
-        'credit_budget': 17000,
-        'credit_terms': 15,
+        'credit_budget': credit_budget,
+        'credit_terms': credit_terms,
         'financial_info': fin_info_list,
         'record_summary': {'mean': None, 'std': None, 'n': 0 }, 
         'records': {}
     }
     
-    
     if show: print(f'{fin_info_list} \n>>>>>>>>>>>>>>>>>>\n{new_user}\nAdding new user ...')
     db.add_new_user(new_user)
+    
     return credit_score
     
     
      
 if __name__ == '__main__':
-    doc_finan_position = read_financial_file(r"D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Data\Original Data\financial data\00194\Financial Position 00194.xlsx")
-    doc_income_statement = read_financial_file(r"D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Data\Original Data\financial data\00194\Income Statement 00194.xlsx")
+    doc_finan_position = read_financial_file(r"D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Script\CreditScoreCalculationProgram\Script\testData\Financial Position 00007.xlsx")
+    doc_income_statement = read_financial_file(r"D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Script\CreditScoreCalculationProgram\Script\testData\Income Statement 00007.xlsx")
     
     fin_info = extract_fin_info(doc_finan_position, doc_income_statement)
     
     # FICO_cal(fin_info, show= True)
-    register_new_user('TS0002', 'Tyre Shop', fin_info, True)
+    register_new_user('TS0003', 'Tyre Shop', fin_info, True)
     
     
 

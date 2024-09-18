@@ -1,6 +1,8 @@
 import numpy as np
 from Script.customerInfo import *
 import Script.databaseClient as db
+# from Script.databaseClient import *
+from Script.credit_cal import cal_credit_values
 from datetime import datetime
 import pandas as pd
 
@@ -254,11 +256,17 @@ def add_new_order(customer_id, payment_info, show= False):
                 "std": np.std(data_list),
                 "n": len(data_list)
             }
-                
-                
+      
     ### Save new record to database
     db.update_customer_info(customer_info)
     update_FICO_score(customer_id)
+    
+    ### Update credit budget & terms  
+    print('update credit budget')        
+    credit_budget, credit_terms = cal_credit_values(customer_id, show= True)
+    customer_info['credit_budget'] = credit_budget
+    customer_info['credit_terms'] = credit_terms
+    db.update_customer_info(customer_info)
 
 
 def add_list_new_order(order_list, show= False):
@@ -300,7 +308,7 @@ def request_new_budget(customer_id, requested_budget, cal_duration= 185, show= F
     return Score
 
 if __name__ == '__main__':
-    customer_ID = '00032'
+    customer_ID = '00001'
     #TS0002
     
     test_customer = db.get_info_by_id(customer_ID)
@@ -319,10 +327,10 @@ if __name__ == '__main__':
     
     
     ### Add order
-    # P.ID = 'SO-202406721'
-    # P.amount = 20000
-    # P.stat = "FULL"
-    # add_new_order(customer_ID, P, show= True)
+    P.ID = 'SO-202406777'
+    P.amount = 25000
+    P.stat = "FULL"
+    add_new_order(customer_ID, P, show= True)
     
     
     ### Add multiple orders
@@ -333,8 +341,8 @@ if __name__ == '__main__':
 
     
     ### Request new budget
-    requested_budget = 40000
-    print(f'Credit Score for requested {requested_budget} is {request_new_budget(customer_ID, requested_budget, show = True)}')
+    # requested_budget = 40000
+    # print(f'Credit Score for requested {requested_budget} is {request_new_budget(customer_ID, requested_budget, show = True)}')
     
     
     ### Check score

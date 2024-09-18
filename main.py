@@ -109,7 +109,7 @@ def show_loading_screen(mode: int = 1, cusID: str = None, Budreq: float = 0, sco
             loading_frame.tkraise()
             progress_bar.start()
             
-            api_thread = threading.Thread(target=lambda: handle_api_call(cusID, mode))
+            api_thread = threading.Thread(target=lambda: handle_api_call(cusID, mode=mode))
             api_thread.start()
         else:
             print("Please input user's ID")
