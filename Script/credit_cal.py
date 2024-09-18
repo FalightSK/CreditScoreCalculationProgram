@@ -1,8 +1,8 @@
-import databaseClient as db
+from .databaseClient import get_info_by_id
 import numpy as np
 
 def cal_credit_budget(customer_id, credit_score= None, show= False):
-    info = db.get_info_by_id(customer_id)
+    info = get_info_by_id(customer_id)
     if credit_score is None: credit_score = info['credit_score']
     
     order_list = []
@@ -21,7 +21,7 @@ def cal_credit_budget(customer_id, credit_score= None, show= False):
     return credit_budget
     
 def cal_credit_terms(customer_id, credit_score= None, show= False):
-    info = db.get_info_by_id(customer_id)
+    info = get_info_by_id(customer_id)
     if credit_score is None: credit_score = info['credit_score']
     
     credit_terms = 5 + 25 * (credit_score - 300) / 500
@@ -30,7 +30,7 @@ def cal_credit_terms(customer_id, credit_score= None, show= False):
     return credit_terms
     
 def cal_credit_values(customer_id, credit_score= None, show= False):
-    info = db.get_info_by_id(customer_id)
+    info = get_info_by_id(customer_id)
     if credit_score is None: credit_score = info['credit_score']
     
     order_list = []

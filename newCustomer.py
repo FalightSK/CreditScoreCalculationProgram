@@ -78,7 +78,7 @@ def register_new_user(customer_id, customer_type, fin_info, show= False):
     
     
     if show: print(f'{fin_info_list} \n>>>>>>>>>>>>>>>>>>\n{new_user}\nAdding new user ...')
-    # db.add_new_user(new_user)
+    db.add_new_user(new_user)
     return credit_score
     
     

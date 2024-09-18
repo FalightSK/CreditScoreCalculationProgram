@@ -103,40 +103,55 @@ import threading
 # Thyphoon API
 from Script.typhoonClient import get_explanation
 
-def show_loading_screen(NewBud: bool = False, cusID: str = None, Budreq: float = 0, score: float = 0):
-    if not NewBud:
+def show_loading_screen(mode: int = 1, cusID: str = None, Budreq: float = 0, score: float = 0):
+    if mode == 0: # Current User
+        if cusID:
+            loading_frame.tkraise()
+            progress_bar.start()
+            
+            api_thread = threading.Thread(target=lambda: handle_api_call(cusID, mode))
+            api_thread.start()
+        else:
+            print("Please input user's ID")
+    elif mode == 1: # New User
         if financial_position_path and income_statement_path:
             customer_id = id_entry.get()
+            customer_type = type_entry.get()
 
             loading_frame.tkraise()
             progress_bar.start()
 
-            api_thread = threading.Thread(target=lambda: handle_api_call(customer_id))
+            api_thread = threading.Thread(target=lambda: handle_api_call(customer_id, customer_type=customer_type, mode=mode))
             api_thread.start()
         else:
             print("Please upload both file")
-    else:
+    elif mode == 2: # Request New budget
         if cusID:
             loading_frame.tkraise()
             progress_bar.start()
 
-            api_thread = threading.Thread(target=lambda: handle_api_call(cusID, NewBud, Budreq, score))
+            api_thread = threading.Thread(target=lambda: handle_api_call(cusID, mode=mode, Budreq=Budreq, score=score))
             api_thread.start()
         else:
             print("Please input user's ID")
     
-def handle_api_call(customer_id, NewBud: bool = False, Budreq: float = 0, score: float = 0):
-    response = get_explanation(customer_id)
-    if not NewBud:
-        root.after(0, update_after_api_response, response)
-    else:
+def handle_api_call(customer_id, customer_type: str = None, mode: int = 1, Budreq: float = 0, score: float = 0):
+    if mode == 0:
+        temp = db.get_info_by_id(customer_id)
+        if temp["explanation"] is None:
+            response = get_explanation(customer_id, index=mode)
+        else:
+            response = temp["explanation"]
+        root.after(0, update_after_curr_api, response, customer_id)
+    elif mode == 1:
+        position = newCustomer.read_financial_file(financial_position_path)
+        income = newCustomer.read_financial_file(income_statement_path)
+        credit_score = int(newCustomer.register_new_user(customer_id, customer_type, newCustomer.extract_fin_info(position, income)))
+        response = get_explanation(customer_id, index=mode)
+        root.after(0, update_after_new_api, response, credit_score)
+    elif mode == 2:
+        response = get_explanation(customer_id, index=mode, new_FICO=score, request_budget=Budreq)
         root.after(0, update_after_req_api, response, customer_id, Budreq, score)
-        pass
-    
-def update_after_api_response(response):
-    progress_bar.stop()
-    text_box.insert("end", response)
-    submit_files()
     
 loading_frame = ttk.Frame(container)
 loading_frame.grid(row=0, column=0, sticky="nsew")
@@ -152,16 +167,17 @@ progress_bar.pack(pady=10)
 ################# ################# #################
 
 ################# NEW USER PAGE #################
-# Placeholder function for submitting files and moving to the credit score page
-def submit_files():
+def update_after_new_api(response, credit_score):
+    progress_bar.stop()
+    text_box.insert("end", response)
+    submit_files(credit_score=credit_score)
+
+from Script import credit_cal
+def submit_files(credit_score):
     customer_id = id_entry.get()
     customer_type = type_entry.get()
     
     if financial_position_path and income_statement_path:
-        position = newCustomer.read_financial_file(financial_position_path)
-        income = newCustomer.read_financial_file(income_statement_path)
-        credit_score = int(newCustomer.register_new_user(customer_id, customer_type, newCustomer.extract_fin_info(position, income)))
-        
         # Update the meter and labels on the credit score page
         credit_meter.configure(amountused=credit_score)
         
@@ -173,8 +189,11 @@ def submit_files():
         label_credit_score_name.config(text=f"Customer ID: {customer_id}")
         label_credit_score_id.config(text=f"Customer Type: {customer_type}")
         
-        label_budget_value.config(text="17000" + " THB")
-        label_term_value.config(text="15" + " Days")
+        
+        temp = db.get_info_by_id(customer_id)
+        
+        label_budget_value.config(text=str(int(temp["credit_budget"])) + " THB")
+        label_term_value.config(text=str(int(temp["credit_terms"])) + " Days")
         
         # Switch to the credit score page
         show_frame(credit_score_page)
@@ -215,7 +234,7 @@ btn_income_statement = ttk.Button(file_frame, text="Upload Income Statement", co
 btn_income_statement.grid(row=1, column=1, padx=10, pady=5)
 
 # Submit Files Button
-btn_submit_files = ttk.Button(new_user_page_content, text="Submit Files", command=show_loading_screen, style="custom-success.TButton", width=20)
+btn_submit_files = ttk.Button(new_user_page_content, text="Submit Files", command=lambda: show_loading_screen(mode=1), style="custom-success.TButton", width=20)
 btn_submit_files.pack(pady=20)
 # Back Button
 btn_back_to_landing = ttk.Button(new_user_page_content, text="Back to Landing Page", command=lambda: show_frame(landing_page), style="custom-danger.TButton", width=20)
@@ -268,7 +287,8 @@ def craete_table():
 
 def on_row_click(event):
     item = customer_table.selection()[0]
-    print(customer_table.item(item, "values"))
+    cusID, _, _, _, _, _ = customer_table.item(item, "values")
+    show_loading_screen(mode=0, cusID=cusID)
 
 import currentCustomer
 from Script.customerInfo import *
@@ -307,10 +327,36 @@ def update_after_req_api(response, customer_id, Budreq, score):
     text_box.insert("end", response)
     show_req_analysis(customer_id, Budreq, score)   
 
+def show_curr_analysis(cusID):
+    
+    temp = db.get_info_by_id(cusID)
+    
+    # Update the meter and labels on the credit score page
+    credit_meter.configure(amountused=int(temp["credit_score"]))
+    
+    # Update the meter color and description based on the score
+    credit_meter.configure(bootstyle=get_rating_and_color(int(temp["credit_score"]))[1])
+    label_credit_confidence.config(text=get_rating_and_color(int(temp["credit_score"]))[0], bootstyle=get_rating_and_color(int(temp["credit_score"]))[1])
+    
+    # Update the customer name and type labels
+    label_credit_score_name.config(text=f"Customer ID: {cusID}")
+    label_credit_score_id.config(text=f"Customer Type: {temp['type']}")
+    
+    label_budget_value.config(text=str(int(temp["credit_budget"])) + " THB")
+    label_term_value.config(text=str(int(temp["credit_terms"])) + " Days")
+    
+    # Switch to the credit score page
+    show_frame(credit_score_page)
+
+def update_after_curr_api(response, customer_id):
+    progress_bar.stop()
+    text_box.insert("end", response)
+    show_curr_analysis(customer_id)
+
 def request_budget(modal, cusID, budReq):
     modal.destroy()
     score = currentCustomer.request_new_budget(cusID, float(budReq))
-    show_loading_screen(NewBud=True, cusID=cusID, Budreq=float(budReq), score=score)
+    show_loading_screen(mode=2, cusID=cusID, Budreq=int(float(budReq)), score=int(score))
 
 def request_budget_modal():
     # Create a new Toplevel window (modal)

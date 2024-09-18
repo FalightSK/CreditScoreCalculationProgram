@@ -1,5 +1,5 @@
 from openai import OpenAI
-from databaseClient import get_info_by_id, update_explanation
+from .databaseClient import get_info_by_id, update_explanation
 import os
 
 ### Setup
