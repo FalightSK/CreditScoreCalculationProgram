@@ -42,7 +42,7 @@ def cal_credit_values(customer_id, credit_score= None, show= False):
         else:
             mean_order = np.mean(order_list)
     except:
-        mean_order = 17000
+        mean_order = 10000
     
     fac = (credit_score - 490) / 360
     fac = 0 if fac < 0 else fac
