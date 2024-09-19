@@ -38,7 +38,7 @@ def cal_credit_values(customer_id, credit_score= None, show= False):
         for order in info['records'].values():
             order_list.append(order['amount'])
         if len(order_list) == 0:
-            mean_order = 17000
+            mean_order = 10000
         else:
             mean_order = np.mean(order_list)
     except:
