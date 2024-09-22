@@ -1,5 +1,6 @@
 import json
 import os
+import numpy as np
 
 Dir = os.getcwd()
 path = 'Script\\database.json'
@@ -64,11 +65,40 @@ def update_explanation(customer_id, explanation):
     
     save(info)
     
+def delete_by_id(customer_id, order_id= None):
+    info = read()
+    
+    if customer_id in info['history']:
+        if order_id is None:
+            info['history'].pop(customer_id)
+        else:
+            if order_id in info['history'][customer_id]['records']:
+                info['history'][customer_id]['records'].pop(order_id)
+                order_list = [order['amount'] for order in info['history'][customer_id]['records'].values() if order['stat'] == 'FULL']
+                
+                info['history'][customer_id]['record_summary'] = {
+                    'mean': np.mean(order_list),
+                    'std': np.std(order_list),
+                    'n': len(order_list)
+                }
+                
+            else:
+                print('order {order_id} does not exists')
+                return False
+    else:
+        print(f'customer {customer_id} does not exists')
+        return False
+    
+    save(info)
+    return True
+
+
 
 if __name__ == '__main__':
-    print(read()['history']['00008']['records'])
+    # print(read()['history']['00008']['records'])
+    
+    # print(delete_by_id('TS0005'))
     pass
-
     # save({'test': 'helloworld!!!'})
     # print(get_mean_by_id('00001'))
     
