@@ -55,7 +55,7 @@ def cal_credit_values(customer_id, credit_score= None, show= False):
 
     if show: print(f'Credit Budget: {round(mean_order, 3)} -> {round(credit_budget, 3)}\nCredit Terms: {round(credit_terms, 3)}')
     
-    return credit_budget, credit_terms
+    return int(credit_budget), int(credit_terms)
      
     
 if __name__ == '__main__':

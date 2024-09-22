@@ -181,7 +181,7 @@ def cal_FICO_current(customer_id, payment_info, requested_budget, set_n= 100, sh
         print('>> credit_mix:', credit_mix)
         print('>> new_credit:', new_credit)
         
-    return Score, {'payment_his': payment_his, 'amount_owed': amount_owed, 'credit_his_len': credit_history_length, 'credit_mix': credit_mix, 'new_credit': new_credit}
+    return int(min(max(Score, 300), 850)), {'payment_his': payment_his, 'amount_owed': amount_owed, 'credit_his_len': credit_history_length, 'credit_mix': credit_mix, 'new_credit': new_credit}
 
 # Score retrieve
 def cal_final_FICO_score(customer_id, cal_duration= 185, show= False):
@@ -204,7 +204,7 @@ def cal_final_FICO_score(customer_id, cal_duration= 185, show= False):
     
     if show: print(f'{customer_id}: [{len(FICO)}] -> {FICO} >>>>> ', end='')
     if len(FICO) == 0: return 300
-    return int(np.mean(FICO))
+    return int(min(max(np.mean(FICO), 300), 850))
         
 def update_FICO_score(customer_id, cal_duration= 185, score= None, score_info= None):
     if score is None:
@@ -268,7 +268,6 @@ def add_new_order(customer_id, payment_info, show= False):
     customer_info['credit_terms'] = credit_terms
     db.update_customer_info(customer_info)
 
-
 def add_list_new_order(order_list, show= False):
     for customer_id, order in order_list:
         if show:
@@ -305,7 +304,7 @@ def request_new_budget(customer_id, requested_budget, cal_duration= 185, show= F
     else:
         Score = 0.35 * np.mean(score['payment_his']) + 0.3 * np.mean(score['amount_owed']) + 0.15 * np.mean(score['credit_his_len']) + 0.1 * np.mean(score['credit_mix']) + 0.1 * new_credit
 
-    return Score
+    return int(min(max(Score, 300), 850))
 
 if __name__ == '__main__':
     customer_ID = '00001'

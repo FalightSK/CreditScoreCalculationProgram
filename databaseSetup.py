@@ -5,6 +5,7 @@ import datetime
 import Script.databaseClient as db
 from Script.customerInfo import order, extract_fin_info, read_financial_file, PaymentInfo
 from currentCustomer import cal_FICO_current, cal_final_FICO_score
+from Script.credit_cal import cal_credit_values
 
 
 # def set_date(dmy):
@@ -261,7 +262,20 @@ def upload_credit_score():
         }  
     # print(database['history']['50083']['records'])
     db.save(new_database)
-   
+
+
+############ Update credit values
+def upload_credit_values():
+    database = db.read()
+    
+    for customer in database['history']:
+        budget, terms = cal_credit_values(customer)
+        print(customer, budget, terms)
+        database['history'][customer]['credit_budget'] = budget
+        database['history'][customer]['credit_terms'] = terms
+        
+    db.save(database)
+  
    
     
 if __name__ == '__main__':
@@ -269,7 +283,8 @@ if __name__ == '__main__':
     # upload_record_sum()
     # upload_fin_record()
     # upload_cred_criteria()
-    upload_local_credit_score()
-    upload_credit_score()
+    # upload_local_credit_score()
+    # upload_credit_score()
+    upload_credit_values()
     
     pass

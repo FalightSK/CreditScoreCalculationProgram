@@ -56,7 +56,7 @@ def FICO_cal(all_fin_info, show = False):
     FICO = 0.6 * amount_owe_list[n_fin_info] + 0.2 * credit_mix_list[n_fin_info] + 0.2 * np.mean(new_credit_list)
     if show:
         print('\nFICO SCORE:', round(FICO, 3))
-    return min(FICO, 850)
+    return int(min(FICO, 850))
      
 def register_new_user(customer_id, customer_type, fin_info, show= False):
     credit_score = FICO_cal(fin_info, show= show)
