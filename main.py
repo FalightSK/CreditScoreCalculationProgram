@@ -172,7 +172,6 @@ def update_after_new_api(response, credit_score):
     text_box.insert("end", response)
     submit_files(credit_score=credit_score)
 
-from Script import credit_cal
 def submit_files(credit_score):
     customer_id = id_entry.get()
     customer_type = type_entry.get()
@@ -405,6 +404,53 @@ def request_budget_modal():
     # Block interaction with the main window until the modal is closed
     # modal.wait_window()
 
+from Script.databaseClient import delete_by_id
+
+def delete_helper(modal, customer_id):
+    valid = delete_by_id(customer_id=customer_id)
+    
+    if valid:
+        modal.destroy()
+
+def delete_user_modal():
+    # Create a new Toplevel window (modal)
+    modal = ttk.Toplevel(root)
+    modal.title("Remove Customer")
+    modal.geometry("500x400")
+    
+    # Center the modal on the screen
+    modal.geometry("+%d+%d" % (root.winfo_screenwidth() // 2 - 150, root.winfo_screenheight() // 2 - 100))
+
+    # Prevent interaction with the main window
+    modal.grab_set()
+    
+    # Center component
+    centering_frame = ttk.Frame(modal)
+    centering_frame.place(relx=0.5, rely=0.5, anchor="center")
+
+    # Add some content to the modal
+    label = ttk.Label(centering_frame, text="Remove Customer Form", font=("Segoe UI", 14, "bold"), bootstyle="primary")
+    label.pack(pady=20)
+    
+    request_id_frame = ttk.Frame(centering_frame)
+    request_id_frame.pack(pady=10, fill="x")
+
+    id_label = ttk.Label(request_id_frame, text="Customer ID: ", font=("Segoe UI", 12))
+    id_label.pack(side="left", padx=5)
+    id_entry = ttk.Entry(request_id_frame, font=("Segoe UI", 12), width=30)
+    id_entry.pack(side="left", padx=5)
+
+    # Button to submit the form
+    submit_button = ttk.Button(centering_frame, text="submit", bootstyle="success", command=lambda: delete_helper(modal, id_entry.get()))
+    submit_button.pack(pady=10)
+    
+    # Button to close the modal
+    close_button = ttk.Button(centering_frame, text="Close", bootstyle="danger", command=modal.destroy)
+    close_button.pack(pady=10)
+
+    # Block interaction with the main window until the modal is closed
+    modal.wait_window()
+
 def reset_page(page_change: bool = False):
     search_entry.delete(0, 'end')
     filter_combobox.current(0)
@@ -442,6 +488,10 @@ filter_combobox.pack(side="left", padx=5)
 # Button to trigger filter
 filter_button = ttk.Button(search_filter_frame, text="Apply", command=craete_table, bootstyle="primary")
 filter_button.pack(side="left", padx=10)
+
+# Delete button
+delete_user_button = ttk.Button(search_filter_frame, text="Remove Customer", command=delete_user_modal, bootstyle="warning")
+delete_user_button.pack(side="left", padx=10)
 
 # Create a frame to hold the table and scrollbar
 table_frame = ttk.Frame(main_page)
