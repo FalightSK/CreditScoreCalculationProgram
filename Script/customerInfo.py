@@ -164,6 +164,9 @@ def extract_order_info(doc):
           
     return payment_list
 
+def export_order_info():
+    pass
+
 
 # Data Structure
 order = {
