@@ -80,5 +80,5 @@ def get_explanation(customer_id, index= 0, new_FICO= None, request_budget= None)
 if __name__ == '__main__':
     custom_ID = '00001'
     # print(get_explanation(custom_ID, index= 0))
-    print(read_customer_info(custom_ID))
+    # print(read_customer_info(custom_ID))
     

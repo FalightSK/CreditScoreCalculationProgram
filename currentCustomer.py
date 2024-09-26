@@ -184,7 +184,7 @@ def cal_FICO_current(customer_id, payment_info, requested_budget, set_n= 100, sh
     return int(min(max(Score, 300), 850)), {'payment_his': payment_his, 'amount_owed': amount_owed, 'credit_his_len': credit_history_length, 'credit_mix': credit_mix, 'new_credit': new_credit}
 
 # Score retrieve
-def cal_final_FICO_score(customer_id, cal_duration= 185, show= False):
+def cal_final_FICO_score(customer_id, cal_duration= 185, show= True):
     info = db.get_info_by_id(customer_id)
     orders = info['records']
     
@@ -201,15 +201,18 @@ def cal_final_FICO_score(customer_id, cal_duration= 185, show= False):
         else:
             break
 
-    
-    if show: print(f'{customer_id}: [{len(FICO)}] -> {FICO} >>>>> ', end='')
-    if len(FICO) == 0: return 300
-    return int(min(max(np.mean(FICO), 300), 850))
+    if len(FICO) == 0: 
+        score = 300
+    else:
+        score = int(min(max(np.mean(FICO), 300), 850))
+        
+    if show: print(f'{customer_id}: [{len(FICO)}] -> {FICO} >>>>> {score}', end='')
+    return score
         
 def update_FICO_score(customer_id, cal_duration= 185, score= None, score_info= None):
     if score is None:
         score = cal_final_FICO_score(customer_id, cal_duration= 185)
-        
+    
     db.update_credit_score(customer_id, score)
 
 def get_FICO_score(customer_id):
@@ -260,6 +263,7 @@ def add_new_order(customer_id, payment_info, show= False):
     ### Save new record to database
     db.update_customer_info(customer_info)
     update_FICO_score(customer_id)
+    customer_info = db.get_info_by_id(customer_id)
     
     ### Update credit budget & terms  
     print('update credit budget')        
@@ -307,12 +311,12 @@ def request_new_budget(customer_id, requested_budget, cal_duration= 185, show= F
     return int(min(max(Score, 300), 850))
 
 if __name__ == '__main__':
-    customer_ID = '00001'
+    customer_ID = 'WH0001'
     #TS0002
     
-    test_customer = db.get_info_by_id(customer_ID)
-    P = PaymentInfo()
-    P.JSON_to_PaymentInfo(test_customer['records'][list(test_customer['records'].keys())[0]])
+    # test_customer = db.get_info_by_id(customer_ID)
+    # P = PaymentInfo()
+    # P.JSON_to_PaymentInfo(test_customer['records'][list(test_customer['records'].keys())[0]])
     # P.show()
     
     
@@ -326,14 +330,14 @@ if __name__ == '__main__':
     
     
     ### Add order
-    P.ID = 'SO-202406777'
-    P.amount = 25000
-    P.stat = "FULL"
-    add_new_order(customer_ID, P, show= True)
+    # P.ID = 'SO-202406777'
+    # P.amount = 25000
+    # P.stat = "FULL"
+    # add_new_order(customer_ID, P, show= True)
     
     
     ### Add multiple orders
-    # path = r'D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Script\CreditScoreCalculationProgram\Script\testData\raw_data_for_fourth_test.xlsx'
+    # path = r'D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Script\CreditScoreCalculationProgram\Script\testData\raw_data_for_fIfth_test.xlsx'
     # doc = read_order_file(path)
     # payment_list = extract_order_info(doc)
     # add_list_new_order(payment_list, show= True)

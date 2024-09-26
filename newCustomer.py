@@ -58,13 +58,18 @@ def FICO_cal(all_fin_info, show = False):
         print('\nFICO SCORE:', round(FICO, 3))
     return int(min(FICO, 850))
      
-def register_new_user(customer_id, customer_type, fin_info, show= False):
-    credit_score = FICO_cal(fin_info, show= show)
-    print(credit_score)
-    
+def register_new_user(customer_id, customer_type, fin_info, show= False):  
     fin_info_list = []
-    for info in fin_info:
-        fin_info_list.append(info.FinancialInfo_to_JSON())
+    try:
+        credit_score = FICO_cal(fin_info, show= show)
+        
+        for info in fin_info:
+            fin_info_list.append(info.FinancialInfo_to_JSON())
+    except:
+        credit_score = 300
+    print(credit_score) 
+        
+    
     
     credit_budget, credit_terms = cal_credit_values(customer_id, credit_score, True)
     new_user = {
@@ -77,6 +82,7 @@ def register_new_user(customer_id, customer_type, fin_info, show= False):
         'record_summary': {'mean': None, 'std': None, 'n': 0 }, 
         'records': {}
     }
+
     
     if show: print(f'{fin_info_list} \n>>>>>>>>>>>>>>>>>>\n{new_user}\nAdding new user ...')
     db.add_new_user(new_user)
@@ -86,13 +92,16 @@ def register_new_user(customer_id, customer_type, fin_info, show= False):
     
      
 if __name__ == '__main__':
-    doc_finan_position = read_financial_file(r"D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Script\CreditScoreCalculationProgram\Script\testData\Financial Position 00007.xlsx")
-    doc_income_statement = read_financial_file(r"D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Script\CreditScoreCalculationProgram\Script\testData\Income Statement 00007.xlsx")
+    doc_finan_position = read_financial_file(r"D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Script\CreditScoreCalculationProgram\Script\testData\empty\Financial Position 00000.xlsx")
+    doc_income_statement = read_financial_file(r"D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Script\CreditScoreCalculationProgram\Script\testData\empty\Income Statement 00000.xlsx")
     
     fin_info = extract_fin_info(doc_finan_position, doc_income_statement)
+    # for fin in fin_info:
+    #     fin.show()
+    # print(fin_info)
     
     # FICO_cal(fin_info, show= True)
-    register_new_user('TS0003', 'Tyre Shop', fin_info, True)
+    register_new_user('WH0001', 'Tyre Shop', fin_info, True)
     
     
 

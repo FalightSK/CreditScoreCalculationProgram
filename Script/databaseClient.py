@@ -46,6 +46,7 @@ def get_info_by_id(customer_id):
 def update_credit_score(customer_id, score):
     database = read()
     database['history'][customer_id]['credit_score'] = score
+    database['history'][customer_id]['explanation'] = None
     save(database)
 
 def add_new_user(customer_info):

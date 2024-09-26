@@ -4067,8 +4067,8 @@
         "00006": {
             "customer_id": "00006",
             "type": "Tyre Shop",
-            "credit_score": 519,
-            "credit_budget": 6367,
+            "credit_score": 518,
+            "credit_budget": 6298,
             "credit_terms": 8,
             "financial_info": [],
             "record_summary": {
@@ -7103,8 +7103,8 @@
         "00008": {
             "customer_id": "00008",
             "type": "Tyre Shop",
-            "credit_score": 747,
-            "credit_budget": 29109,
+            "credit_score": 746,
+            "credit_budget": 29018,
             "credit_terms": 16,
             "financial_info": [],
             "record_summary": {
@@ -13019,8 +13019,8 @@
         "00032": {
             "customer_id": "00032",
             "type": "Tyre Shop",
-            "credit_score": 736,
-            "credit_budget": 18803,
+            "credit_score": 741,
+            "credit_budget": 19106,
             "credit_terms": 16,
             "financial_info": [],
             "record_summary": {
@@ -14211,7 +14211,7 @@
         "00033": {
             "customer_id": "00033",
             "type": "Tyre Shop",
-            "credit_score": 323,
+            "credit_score": 320,
             "credit_budget": 3769,
             "credit_terms": 7,
             "financial_info": [],
@@ -14975,7 +14975,7 @@
         "00034": {
             "customer_id": "00034",
             "type": "Tyre Shop",
-            "credit_score": 410,
+            "credit_score": 412,
             "credit_budget": 4801,
             "credit_terms": 7,
             "financial_info": [],
@@ -21255,8 +21255,8 @@
         "00068": {
             "customer_id": "00068",
             "type": "Tyre Shop",
-            "credit_score": 618,
-            "credit_budget": 28409,
+            "credit_score": 615,
+            "credit_budget": 27964,
             "credit_terms": 11,
             "financial_info": [],
             "record_summary": {
@@ -23821,8 +23821,8 @@
         "00081": {
             "customer_id": "00081",
             "type": "Tyre Shop",
-            "credit_score": 660,
-            "credit_budget": 11037,
+            "credit_score": 661,
+            "credit_budget": 11084,
             "credit_terms": 13,
             "financial_info": [],
             "record_summary": {
@@ -27609,8 +27609,8 @@
         "00106": {
             "customer_id": "00106",
             "type": "Tyre Shop",
-            "credit_score": 664,
-            "credit_budget": 37239,
+            "credit_score": 665,
+            "credit_budget": 37396,
             "credit_terms": 13,
             "financial_info": [],
             "record_summary": {
@@ -33981,7 +33981,7 @@
         "00134": {
             "customer_id": "00134",
             "type": "Tyre Shop",
-            "credit_score": 423,
+            "credit_score": 421,
             "credit_budget": 2786,
             "credit_terms": 7,
             "financial_info": [
@@ -34725,8 +34725,8 @@
         "00136": {
             "customer_id": "00136",
             "type": "Tyre Shop",
-            "credit_score": 818,
-            "credit_budget": 11955,
+            "credit_score": 819,
+            "credit_budget": 11986,
             "credit_terms": 19,
             "financial_info": [
                 {
@@ -47313,9 +47313,9 @@
         "00194": {
             "customer_id": "00194",
             "type": "Tyre Shop",
-            "credit_score": 519,
-            "credit_budget": 4777,
-            "credit_terms": 8,
+            "credit_score": 515,
+            "credit_budget": 4570,
+            "credit_terms": 7,
             "financial_info": [
                 {
                     "total_assets": 453328752.22,
@@ -64785,7 +64785,7 @@
         "F00041": {
             "customer_id": "F00041",
             "type": "Fleet",
-            "credit_score": 402,
+            "credit_score": 401,
             "credit_budget": 1649,
             "credit_terms": 7,
             "financial_info": [
@@ -65513,7 +65513,7 @@
         "F00058": {
             "customer_id": "F00058",
             "type": "Fleet",
-            "credit_score": 428,
+            "credit_score": 423,
             "credit_budget": 616,
             "credit_terms": 7,
             "financial_info": [
@@ -66873,8 +66873,8 @@
         "F00066": {
             "customer_id": "F00066",
             "type": "Fleet",
-            "credit_score": 500,
-            "credit_budget": 991,
+            "credit_score": 498,
+            "credit_budget": 964,
             "credit_terms": 7,
             "financial_info": [
                 {
@@ -69897,8 +69897,8 @@
         "G00006": {
             "customer_id": "G00006",
             "type": "Garage",
-            "credit_score": 666,
-            "credit_budget": 2461,
+            "credit_score": 665,
+            "credit_budget": 2451,
             "credit_terms": 13,
             "financial_info": [],
             "record_summary": {
@@ -71517,8 +71517,8 @@
         "G00009": {
             "customer_id": "G00009",
             "type": "Garage",
-            "credit_score": 789,
-            "credit_budget": 4043,
+            "credit_score": 788,
+            "credit_budget": 4032,
             "credit_terms": 18,
             "financial_info": [
                 {
