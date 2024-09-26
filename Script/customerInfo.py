@@ -1,6 +1,7 @@
 import copy
 import datetime
 import pandas as pd
+from databaseClient import read
 #181146
 
 # Data Classes
@@ -164,8 +165,33 @@ def extract_order_info(doc):
           
     return payment_list
 
-def export_order_info():
-    pass
+def export_order_info(save= True, path= ''):
+    if path != '':
+        path += '\\'
+    info = read()
+    data = {
+        'customer ID' : [],
+        'customer type': [],
+        'credit score': [],
+        'credit budget': [],
+        'credit terms': []
+    }
+    
+    ## Sheet 1: Individual Information
+    for customer in info['history'].values():
+        data['customer ID'].append(customer['customer_id'])
+        data['customer type'].append(customer['type'])
+        data['credit score'].append(customer['credit_score'])
+        data['credit budget'].append(customer['credit_budget'])
+        data['credit terms'].append(customer['credit_terms'])
+        
+    # print(data)
+
+    doc = pd.DataFrame(data)
+    print(f'{path}overall_info.xlsx')
+    
+    if save: doc.to_excel(f'{path}overall_info.xlsx', sheet_name= 'IndividualData', index= False)
+    return doc
 
 
 # Data Structure
@@ -209,5 +235,11 @@ summary = {
     }
 }
 
+
+if __name__ == '__main__':
+    export_order_info(False, 'Script')
+    pass
+    
+    
 
         
