@@ -226,6 +226,22 @@ def get_FICO_score(customer_id):
 def add_new_order(customer_id, payment_info, show= False):
     ### Add record
     customer_info = db.get_info_by_id(customer_id)
+    if customer_info is None:
+        return None
+        # credit_budget, credit_terms = cal_credit_values(customer_id, credit_score, True)
+        # new_user = {
+        #     'customer_id': customer_id,
+        #     'type': customer_type,
+        #     'credit_score': credit_score,
+        #     'credit_budget': credit_budget,
+        #     'credit_terms': credit_terms,
+        #     'financial_info': fin_info_list,
+        #     'record_summary': {'mean': None, 'std': None, 'n': 0 }, 
+        #     'records': {}
+        # }
+        
+        # db.add_new_user(new_user)
+        # customer_info = db.get_info_by_id(customer_id)
     # payment_info.show()
     order = payment_info.PaymentInfo_to_JSON()
     # print('order:', order)
