@@ -4,13 +4,9 @@ import numpy as np
 import datetime
 import Script.databaseClient as db
 from Script.customerInfo import order, extract_fin_info, read_financial_file, PaymentInfo
-from currentCustomer import cal_FICO_current, cal_final_FICO_score
+from currentCustomer import cal_FICO_current, cal_final_FICO_score, add_new_order
+from newCustomer import register_new_user
 from Script.credit_cal import cal_credit_values
-
-
-# def set_date(dmy):
-#     return (dmy[2], dmy[1], dmy[0])
-    
 
 
 doc = pd.read_excel(r"D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Data\Original Data\Merged_Transaction_Data_with_Customer_Type.xlsx")
@@ -33,61 +29,7 @@ def upload_data_struct():
         if customer_id != prev_cus_id:
             prev_cus_id = customer_id
             
-            users[customer_id] = {
-                'customer_id': customer_id,
-                'type': row['Type Of Customer'],
-                'credit_score': None,
-                'credit_budget': 17000,
-                'credit_terms': 15,
-                'financial_info': [],
-                'last_update': str(datetime.datetime.now()).split('.')[0],
-                'record_summary': {
-                    'mean': None,
-                    'std': None,
-                    'n': None
-                }, 
-                'records': {},
-                'explanation': None
-            }
             
-        if trans_id != prev_id:
-            print(trans_id)
-            prev_id = trans_id
-            local_data['ID'] = trans_id
-            local_data['amount'] = row['Transaction Value']
-            
-            local_data['order_date'] = [int(j) for j in row['Transaction Date'].split('/')]
-            # print(local_data['order_date'])
-            
-            try:
-                local_data['paid_date'] = [int(j) for j in row['Payment Date'].split()[0].split('/')]
-            except:
-                local_data['paid_date'] = None
-            
-            local_stat = row['Payment Status']
-            if local_stat == 'ชำระครบ':
-                local_stat = 'FULL'
-            elif local_stat == 'ชำระบางส่วน':
-                local_stat = 'PARTIAL'
-            elif local_stat == 'รอการชำระเงิน':
-                local_stat = 'OVERDUE'
-            else:
-                continue
-            local_data['stat'] = local_stat
-            
-            local_method = row['Payment Method'] 
-            local_data['method'] = 'CASH' if local_method == 'เงินสด' else 'IN_STORE' if local_method == 'หน้าร้าน' else 'CREDIT_CARD' if local_method == "รอตัด" or local_method == "เครื่องรูดบัตร" else 'OTHERS'
-            
-            users[customer_id]['records'][trans_id] = local_data
-        
-
-    users = dict(sorted(users.items()))
-    database = {
-        'history': users,
-        'summary': None
-    }        
-
-    db.save(database)
 
 
 ############ Upload record summary

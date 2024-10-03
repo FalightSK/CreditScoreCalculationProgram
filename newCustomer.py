@@ -79,6 +79,7 @@ def register_new_user(customer_id, customer_type, fin_info, show= False):
         'credit_budget': credit_budget,
         'credit_terms': credit_terms,
         'financial_info': fin_info_list,
+        'last_update': None,
         'record_summary': {'mean': None, 'std': None, 'n': 0 }, 
         'records': {}
     }

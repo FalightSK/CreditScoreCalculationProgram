@@ -286,6 +286,11 @@ def add_new_order(customer_id, payment_info, show= False):
     credit_budget, credit_terms = cal_credit_values(customer_id, show= True)
     customer_info['credit_budget'] = credit_budget
     customer_info['credit_terms'] = credit_terms
+    
+    ### Record update time
+    customer_info['last_update'] = str(datetime.now()).split('.')[0]
+    
+    ### Save data to database
     db.update_customer_info(customer_info)
 
 def add_list_new_order(order_list, show= False):
@@ -328,6 +333,7 @@ def request_new_budget(customer_id, requested_budget, cal_duration= 185, show= F
 
 if __name__ == '__main__':
     customer_ID = 'WH0001'
+    
     #TS0002
     
     # test_customer = db.get_info_by_id(customer_ID)
@@ -353,7 +359,7 @@ if __name__ == '__main__':
     
     
     ### Add multiple orders
-    # path = r'D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Script\CreditScoreCalculationProgram\Script\testData\raw_data_for_fIfth_test.xlsx'
+    # path = r'D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Script\CreditScoreCalculationProgram\Script\testData\raw_data_for_third_test.xlsx'
     # doc = read_order_file(path)
     # payment_list = extract_order_info(doc)
     # add_list_new_order(payment_list, show= True)
