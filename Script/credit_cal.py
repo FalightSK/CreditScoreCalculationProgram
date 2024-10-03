@@ -44,13 +44,14 @@ def cal_credit_values(customer_id, credit_score= None, show= False):
     except:
         mean_order = 10000
     
-    fac = (credit_score - 490) / 360
-    fac = 0 if fac < 0 else fac
-    # print(fac, mean_order)
     
-    credit_terms = 7 + 14 * fac
+    fac_terms = (credit_score - 670) / 370
+    fac_terms = 0 if fac_terms > 0 else fac_terms
+    credit_terms = 30 + 23 * fac_terms
     
-    M_credit_budget = 0.3 + 1.7 * fac
+    fac_budget = (credit_score - 490) / 360
+    fac_budget = 0 if fac_budget < 0 else fac_budget
+    M_credit_budget = 0.3 + 1.7 * fac_budget
     credit_budget = mean_order * M_credit_budget
 
     if show: print(f'Credit Budget: {round(mean_order, 3)} -> {round(credit_budget, 3)}\nCredit Terms: {round(credit_terms, 3)}')

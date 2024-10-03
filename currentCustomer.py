@@ -172,7 +172,8 @@ def cal_new_credit(customer_id, requested_budget, payment_stat= "OVERDUE", set_n
     return max(min(Sf, 850), 300)
 
 def cal_FICO_current(customer_id, payment_info, requested_budget, set_n= 100, show= False):
-    Score = 0.35 * (payment_his := cal_payment_his(payment_info)) + 0.3 * (amount_owed := cal_amount_owed(payment_info)) + 0.15 * (credit_history_length := cal_credit_history_length(customer_id)) + 0.1 * (credit_mix := cal_credit_mix(customer_id)) + 0.1 * (new_credit := cal_new_credit(customer_id, requested_budget, payment_stat= payment_info.stat, set_n= set_n))
+    info = db.get_info_by_id(customer_id)
+    Score = 0.35 * (payment_his := cal_payment_his(payment_info, credit_term= info['credit_terms'])) + 0.3 * (amount_owed := cal_amount_owed(payment_info)) + 0.15 * (credit_history_length := cal_credit_history_length(customer_id)) + 0.1 * (credit_mix := cal_credit_mix(customer_id)) + 0.1 * (new_credit := cal_new_credit(customer_id, requested_budget, payment_stat= payment_info.stat, set_n= set_n))
 
     if show:
         print('>> payment_his:', payment_his)
@@ -183,8 +184,8 @@ def cal_FICO_current(customer_id, payment_info, requested_budget, set_n= 100, sh
         
     return int(min(max(Score, 300), 850)), {'payment_his': payment_his, 'amount_owed': amount_owed, 'credit_his_len': credit_history_length, 'credit_mix': credit_mix, 'new_credit': new_credit}
 
-# Score retrieve
-def cal_final_FICO_score(customer_id, cal_duration= 185, show= True):
+# Score retrieve -> 185
+def cal_final_FICO_score(customer_id, cal_duration= 365, show= True):
     info = db.get_info_by_id(customer_id)
     orders = info['records']
     
@@ -195,7 +196,7 @@ def cal_final_FICO_score(customer_id, cal_duration= 185, show= True):
         order_date = datetime(order['order_date'][2], order['order_date'][1], order['order_date'][0])
         day_dif = today - order_date
         
-        if show: print(i, order_id, day_dif, sep=' | ')
+        if show: print(i, order_id, day_dif, f'D: {cal_duration}',sep=' | ')
         if day_dif.days < cal_duration:
             FICO.append(order['local_credit_score'])
         else:
@@ -209,9 +210,9 @@ def cal_final_FICO_score(customer_id, cal_duration= 185, show= True):
     if show: print(f'{customer_id}: [{len(FICO)}] -> {FICO} >>>>> {score}', end='')
     return score
         
-def update_FICO_score(customer_id, cal_duration= 185, score= None, score_info= None):
+def update_FICO_score(customer_id, cal_duration= 365, score= None, score_info= None):
     if score is None:
-        score = cal_final_FICO_score(customer_id, cal_duration= 185)
+        score = cal_final_FICO_score(customer_id, cal_duration)
     
     db.update_credit_score(customer_id, score)
 
@@ -295,6 +296,7 @@ def add_new_order(customer_id, payment_info, show= False):
 
 def add_list_new_order(order_list, show= False):
     for customer_id, order in order_list:
+        # if customer_id != '00001': return
         if show:
             print(f'{customer_id} -> {order.ID}')
         add_new_order(customer_id, order)
