@@ -128,7 +128,11 @@ def extract_order_info(doc):
     
     prev_order_id = ''
     for order in doc.iloc():
-        order_id = order['รายการ']
+        try:
+            order_id = order['รายการ']
+        except:
+            order_id = f"UND-{order['#']}-{str(datetime.datetime.now())}"
+            
         if prev_order_id == order_id or order['สถานะรายการ'] != 'สำเร็จ' or order['มูลค่า'] in [0, 'UNKNOWN']:
             continue
         

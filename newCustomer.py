@@ -58,7 +58,7 @@ def FICO_cal(all_fin_info, show = False):
         print('\nFICO SCORE:', round(FICO, 3))
     return int(min(FICO, 850))
      
-def register_new_user(customer_id, customer_type, fin_info, show= False):  
+def register_new_user(customer_id, customer_type, fin_info, default_credit_terms= 30, show= False):  
     fin_info_list = []
     try:
         credit_score = FICO_cal(fin_info, show= show)

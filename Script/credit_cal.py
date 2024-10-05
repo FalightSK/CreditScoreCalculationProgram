@@ -60,6 +60,6 @@ def cal_credit_values(customer_id, credit_score= None, show= False):
      
     
 if __name__ == '__main__':
-    set_credit_score = 620
-    cal_credit_values('00001', set_credit_score, True)
+    set_credit_score = None
+    cal_credit_values('00006', set_credit_score, True)
     

@@ -3,8 +3,8 @@ import os
 import numpy as np
 import datetime
 import Script.databaseClient as db
-from Script.customerInfo import order, extract_fin_info, read_financial_file, PaymentInfo
-from currentCustomer import cal_FICO_current, cal_final_FICO_score
+from Script.customerInfo import order, extract_fin_info, read_financial_file, PaymentInfo, read_order_file, extract_order_info
+from currentCustomer import cal_FICO_current, cal_final_FICO_score, add_new_order
 from Script.credit_cal import cal_credit_values
 
 
@@ -276,17 +276,27 @@ def upload_credit_values():
         database['history'][customer]['credit_terms'] = terms
         
     db.save(database)
-  
+
+def add_certain_customer(customer_id, path= r"D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Data\Original Data\sale jan-aug 2024 for update.xlsx"):  
+   order_data = extract_order_info(read_order_file(path))
+   
+   for order, payment_info in order_data:
+       if order == customer_id:
+        print(f'----------------------> {payment_info.ID}')
+        # payment_info.show()
+        add_new_order(customer_id, payment_info, True)
+        # print()
    
     
 if __name__ == '__main__':
-    upload_data_struct()
-    upload_record_sum()
-    upload_fin_record()
-    upload_cred_criteria()
-    upload_local_credit_score()
-    print('----------- half way -----------')
-    upload_credit_score()
-    upload_credit_values()
+    # upload_data_struct()
+    # upload_record_sum()
+    # upload_fin_record()
+    # upload_cred_criteria()
+    # upload_local_credit_score()
+    # print('----------- half way -----------')
+    # upload_credit_score()
+    # upload_credit_values()
+    add_certain_customer('00006')
     
     pass
