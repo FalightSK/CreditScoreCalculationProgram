@@ -124,7 +124,7 @@ if __name__ == '__main__':
     
     upload_data_struct()
     upload_fin_record()
-    upload_record_sum(r"D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Data\Original Data\sale jan-aug 2024 for update.xlsx")
+    upload_record_sum(r"D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Data\Original Data\raw_data_AUG_original.xlsx")
 
     time_end = datetime.datetime.now()
     

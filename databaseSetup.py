@@ -38,7 +38,7 @@ def upload_data_struct():
                 'type': row['Type Of Customer'],
                 'credit_score': None,
                 'credit_budget': 17000,
-                'credit_terms': 15,
+                'credit_terms': 30,
                 'financial_info': [],
                 'last_update': str(datetime.datetime.now()).split('.')[0],
                 'record_summary': {

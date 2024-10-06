@@ -178,16 +178,17 @@ def cal_new_credit(customer_id, requested_budget, payment_stat= "OVERDUE", set_n
 
 def cal_FICO_current(customer_id, payment_info, requested_budget, set_n= 100, show= False):
     info = db.get_info_by_id(customer_id)
-    Score = 0.35 * (payment_his := cal_payment_his(payment_info, credit_term= info['credit_terms'], show= show)) + 0.3 * (amount_owed := cal_amount_owed(payment_info, show= show)) + 0.15 * (credit_history_length := cal_credit_history_length(customer_id, show= show)) + 0.1 * (credit_mix := cal_credit_mix(customer_id, show= show)) + 0.1 * (new_credit := cal_new_credit(customer_id, requested_budget, payment_stat= payment_info.stat, set_n= set_n, show= show))
+    Score = 0.35 * (payment_his := cal_payment_his(payment_info, credit_term= info['credit_terms'], show= show)) + 0.3 * (amount_owed := cal_amount_owed(payment_info, show= show)) + 0.2 * (credit_history_length := cal_credit_history_length(customer_id, show= show)) + 0.15 * (new_credit := cal_new_credit(customer_id, requested_budget, payment_stat= payment_info.stat, set_n= set_n, show= show))
 
     if show:
+        print('>>>> Score:', Score)
         print('>> payment_his:', payment_his)
         print('>> amount_owed:', amount_owed)
         print('>> credit_his_len:', credit_history_length)
-        print('>> credit_mix:', credit_mix)
+        # print('>> credit_mix:', credit_mix)
         print('>> new_credit:', new_credit)
         
-    return int(min(max(Score, 300), 850)), {'payment_his': payment_his, 'amount_owed': amount_owed, 'credit_his_len': credit_history_length, 'credit_mix': credit_mix, 'new_credit': new_credit}
+    return int(min(max(Score, 300), 850)), {'payment_his': payment_his, 'amount_owed': amount_owed, 'credit_his_len': credit_history_length, 'credit_mix': None, 'new_credit': new_credit}
 
 # Score retrieve -> 185
 def cal_final_FICO_score(customer_id, cal_duration= 185, show= True):
@@ -364,13 +365,13 @@ if __name__ == '__main__':
     
     
     ### Add order
-    P = PaymentInfo()
-    P.ID = 'UND-675-2024-10-05 23:20:35.779754'
-    P.amount = 4620
-    P.stat = "FULL"
-    P.paid_date = datetime(2024, 9, 5)
-    P.order_date = datetime(2024, 8, 7)
-    add_new_order(customer_ID, P, show= True)
+    # P = PaymentInfo()
+    # P.ID = 'UND-675-2024-10-05 209811'
+    # P.amount = 4620
+    # P.stat = "FULL"
+    # P.paid_date = datetime(2024, 9, 5)
+    # P.order_date = datetime(2024, 8, 7)
+    # add_new_order(customer_ID, P, show= True)
     
     
     ### Add multiple orders
