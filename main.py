@@ -117,11 +117,17 @@ def show_loading_screen(mode: int = 1, cusID: str = None, Budreq: float = 0, sco
         if financial_position_path and income_statement_path:
             customer_id = id_entry.get()
             customer_type = type_entry.get()
+            customer_term = term_entry.get()
+            
+            if customer_term:
+                customer_term = int(customer_term)
+            else:
+                customer_term = 30
 
             loading_frame.tkraise()
             progress_bar.start()
 
-            api_thread = threading.Thread(target=lambda: handle_api_call(customer_id, customer_type=customer_type, mode=mode))
+            api_thread = threading.Thread(target=lambda: handle_api_call(customer_id, customer_type=customer_type, mode=mode, credit_terms=customer_term))
             api_thread.start()
         else:
             print("Please upload both file")
@@ -135,7 +141,7 @@ def show_loading_screen(mode: int = 1, cusID: str = None, Budreq: float = 0, sco
         else:
             print("Please input user's ID")
     
-def handle_api_call(customer_id, customer_type: str = None, mode: int = 1, Budreq: float = 0, score: float = 0):
+def handle_api_call(customer_id, customer_type: str = None, mode: int = 1, Budreq: float = 0, score: float = 0, credit_terms: int = 30):
     if mode == 0:
         temp = db.get_info_by_id(customer_id)
         if temp["explanation"] is None:
@@ -146,7 +152,7 @@ def handle_api_call(customer_id, customer_type: str = None, mode: int = 1, Budre
     elif mode == 1:
         position = newCustomer.read_financial_file(financial_position_path)
         income = newCustomer.read_financial_file(income_statement_path)
-        credit_score = int(newCustomer.register_new_user(customer_id, customer_type, newCustomer.extract_fin_info(position, income)))
+        credit_score = int(newCustomer.register_new_user(customer_id, customer_type, newCustomer.extract_fin_info(position, income), default_credit_terms=credit_terms))
         response = get_explanation(customer_id, index=mode)
         root.after(0, update_after_new_api, response, credit_score)
     elif mode == 2:
@@ -188,7 +194,6 @@ def submit_files(credit_score):
         label_credit_score_name.config(text=f"Customer ID: {customer_id}")
         label_credit_score_id.config(text=f"Customer Type: {customer_type}")
         
-        
         temp = db.get_info_by_id(customer_id)
         
         label_budget_value.config(text=str(int(temp["credit_budget"])) + " THB")
@@ -217,6 +222,11 @@ id_label = ttk.Label(new_user_page_content, text="Customer Type:", font=custom_f
 id_label.pack(pady=5)
 type_entry = ttk.Entry(new_user_page_content, font=custom_font_medium, width=40)
 type_entry.pack(pady=5)
+# Input field for Allowance term
+term_label = ttk.Label(new_user_page_content, text="Allow Term (Optional)", font=custom_font_medium)
+term_label.pack(pady=5)
+term_entry = ttk.Entry(new_user_page_content, font=custom_font_medium, width=40)
+term_entry.pack(pady=5)
 
 # File upload forms placed in the same row
 file_frame = ttk.Frame(new_user_page_content)
@@ -271,7 +281,8 @@ def craete_table():
             customer["credit_budget"],
             customer["credit_terms"],
             customer["credit_score"],
-            emoticon  # Insert emoticon in place of plain text rating
+            emoticon,  # Insert emoticon in place of plain text rating
+            customer["last_update"]
         ), tags=(tag, row_tag))
 
         rating_counts[rating] += 1
@@ -286,7 +297,7 @@ def craete_table():
 
 def on_row_click(event):
     item = customer_table.selection()[0]
-    cusID, _, _, _, _, _ = customer_table.item(item, "values")
+    cusID, _, _, _, _, _, _ = customer_table.item(item, "values")
     show_loading_screen(mode=0, cusID=cusID)
 
 import currentCustomer
@@ -502,7 +513,7 @@ scrollbar = ttk.Scrollbar(table_frame, orient="vertical")
 
 # Config table
 # Table (Treeview) to display customer data
-columns = ("customer_id", "type", "credit_budget", "credit_terms", "credit_score", "rating")
+columns = ("customer_id", "type", "credit_budget", "credit_terms", "credit_score", "rating", "last_update")
 # Define the headings
 customer_table = ttk.Treeview(table_frame, columns=columns, show="headings", height=10, yscrollcommand=scrollbar.set)
 scrollbar.config(command=customer_table.yview) # Adding scroll bar
@@ -517,6 +528,15 @@ customer_table.heading("credit_budget", text="Credit Budget")
 customer_table.heading("credit_terms", text="Credit Terms")
 customer_table.heading("credit_score", text="Credit Score")
 customer_table.heading("rating", text="Rating")
+customer_table.heading("last_update", text="Last Update")
+
+customer_table.column("customer_id", width=100)
+customer_table.column("type", width=150)
+customer_table.column("credit_budget", width=100)
+customer_table.column("credit_terms", width=100)
+customer_table.column("credit_score", width=100)
+customer_table.column("rating", width=100)
+customer_table.column("last_update", anchor="n")
 
 # Define tags for row colors based on credit score
 customer_table.tag_configure("success", foreground="green")
