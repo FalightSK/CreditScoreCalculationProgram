@@ -45,12 +45,13 @@ def upload_data_struct():
                 }
             },
         "credit_history_criteria": {
-            "Fleet": [25000, 6],
-            "Garage": [4000, 2],
-            "Tyre Shop": [47000, 4],
-            "Used Car Dealer": [22000, 6]
+            "Fleet": [21000, 6],
+            "Garage": [400, 2],
+            "Tyre Shop": [33000, 4],
+            "Used Car Dealer": [19500, 6]
             }
-        }  
+        }      
+    
     # print(database['history']['50083']['records'])
     db.save(new_database)
     
@@ -148,16 +149,16 @@ def anlyze_customer_info(customer_id, path="D:\KMITL\KMITL\Year 03 - 01\Prompt E
     
 
 if __name__ == '__main__':
-    # time_start = datetime.datetime.now()
+    time_start = datetime.datetime.now()
     
-    # upload_data_struct()
-    # upload_fin_record()
-    # upload_record_sum(r"D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Data\Original Data\raw_data_AUG_original.xlsx")
+    upload_data_struct()
+    upload_fin_record()
+    upload_record_sum(r"D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Data\Original Data\raw_data_AUG_original.xlsx")
 
-    # time_end = datetime.datetime.now()
+    time_end = datetime.datetime.now()
     
-    # print(f'>>>>>>>>>>>> Total Process Time {str(time_end - time_start).split(".")[0]}')
+    print(f'>>>>>>>>>>>> Total Process Time {str(time_end - time_start).split(".")[0]}')
     
-    anlyze_customer_info('00004', r"D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Data\Original Data\raw_data_AUG_original.xlsx")
+    # anlyze_customer_info('00004', r"D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Data\Original Data\raw_data_AUG_original.xlsx")
     
     pass

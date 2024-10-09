@@ -77,33 +77,72 @@ def cal_amount_owed(payment_info, show= False):
     return Sf
         
 def cal_credit_history_length(customer_id, show= False):
-    n = db.get_number_of_order_by_id(customer_id)
     info = db.get_info_by_id(customer_id)
     
-    # Freq
     customer_type = info['type']
-    # print(customer_type)
     if customer_type == 'UNKNOWN':
-        return 0
+        return 300
     criteria = db.get_criteria_credit_history(customer_type)
     
-    x = n//criteria[1]
-    x = 12 if x > 12 else x
+    this_month = datetime.now().month
     
-    Sf_freq = 300 + (x * 550/12)
-    if show: print(f'cal_credit_history_length >> x_freq-> {x}, {Sf_freq}', end= ' | ')
+    n = 0
+    x = 0
+    prev_month = -1
+    for order in info['records'].values():
+        
+        order_month = order['order_date'][1]
+        if this_month == order_month:
+            continue
+        
+        if prev_month != order_month:
+            prev_month = order_month
+            try:
+                if show: print(f' | (M{order_month}, {monthly_n}, {int(monthly_order/monthly_n)})', end= '')
+                if monthly_n >= criteria[1] or monthly_order/monthly_n >= criteria[0]:
+                    x+=1
+            except:
+                if show: print('first time', end= '')
+                pass
+            monthly_order = 0
+            monthly_n = 0
+            n+=1
+            
+        if n > 6: break    
+        
+        monthly_order += order['amount']
+        monthly_n += 1
+
+            
     
-    # Value
-    val = 0
-    for data_id, data in info['records'].items():
-        val += data['amount']
-    x = val//criteria[0]
+    # # Freq
+    # customer_type = info['type']
+    # # print(customer_type)
+    # if customer_type == 'UNKNOWN':
+    #     return 0
+    # criteria = db.get_criteria_credit_history(customer_type)
     
-    Sf_val = 300 + (x * 550/12)
-    if show: print(f'x_val -> {x}, {Sf_val}')
+    # x = n//criteria[1]
+    # x = 12 if x > 12 else x
     
-    Sf = max([Sf_freq, Sf_val])
-    Sf = max(min(Sf, 850), 300)
+    # Sf_freq = 300 + (x * 550/12)
+    # if show: print(f'cal_credit_history_length >> x_freq-> {x}, {Sf_freq}', end= ' | ')
+    
+    # # Value
+    # val = 0
+    # for data_id, data in info['records'].items():
+    #     val += data['amount']
+    # x = val//criteria[0]
+    
+    # Sf_val = 300 + (x * 550/12)
+    # if show: print(f'x_val -> {x}, {Sf_val}')
+    
+    if show: print(f' >>>>> x: {x}, n: {n}')
+    try:
+        Sf = 300 + (x * 550/(n-1))
+        Sf = max(min(Sf, 850), 300)
+    except:
+        Sf = 300
     return Sf
 
 def cal_credit_mix(customer_id, show= False):
@@ -344,7 +383,7 @@ def request_new_budget(customer_id, requested_budget, cal_duration= 185, show= F
     return int(min(max(Score, 300), 850))
 
 if __name__ == '__main__':
-    customer_ID = '00006'
+    customer_ID = '00005'
     
     #TS0002
     
@@ -357,6 +396,7 @@ if __name__ == '__main__':
     ### Calculation test
     # requested_budget = 10000
     # print('>>>>> FICO:', cal_FICO_current(customer_ID, P, requested_budget, show = True), '<<<<<')
+    print(f'Credit History: {cal_credit_history_length(customer_ID, True)}')
 
     
     ### Data retrival test
