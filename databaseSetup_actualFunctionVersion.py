@@ -119,15 +119,45 @@ def upload_record_sum(path= r"D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\0
     add_list_new_order(order_list, True)
 
 
-if __name__ == '__main__':
-    time_start = datetime.datetime.now()
-    
-    upload_data_struct()
-    upload_fin_record()
-    upload_record_sum(r"D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Data\Original Data\raw_data_AUG_original.xlsx")
 
-    time_end = datetime.datetime.now()
+############ Analyze customer info
+def anlyze_customer_info(customer_id, path="D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Data\Original Data\raw_data_original.xlsx"):
+    order_list = extract_order_info(read_order_file(path))
+    customer_info = db.get_info_by_id(customer_id)
     
-    print(f'>>>>>>>>>>>> Total Process Time {str(time_end - time_start).split(".")[0]}')
+    local_order_list = []
+    customer_behavior = {}
+    payment_behavior = {'Late': 0, 'Ontime': 0}
+    for local_customer_id, order in order_list:
+        if local_customer_id != customer_id:
+            continue
+        local_order_list.append(order.amount)
+        
+        try: customer_behavior[order.stat] += 1
+        except: customer_behavior[order.stat] = 1
+        
+        if order.stat == 'FULL':
+            val = (order.paid_date - order.order_date).days - customer_info['credit_terms']
+            if val > 0:
+                payment_behavior['Late'] += 1
+            else:
+                payment_behavior['Ontime'] += 1
+        
+    print(f"Mean: {np.mean(local_order_list)} \nSTD: {np.std(local_order_list)} \nCustomer Behavior: {customer_behavior} \nPayment Behavior: {payment_behavior}")
+    
+    
+
+if __name__ == '__main__':
+    # time_start = datetime.datetime.now()
+    
+    # upload_data_struct()
+    # upload_fin_record()
+    # upload_record_sum(r"D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Data\Original Data\raw_data_AUG_original.xlsx")
+
+    # time_end = datetime.datetime.now()
+    
+    # print(f'>>>>>>>>>>>> Total Process Time {str(time_end - time_start).split(".")[0]}')
+    
+    anlyze_customer_info('00004', r"D:\KMITL\KMITL\Year 03 - 01\Prompt Engineer\Work\08_08_2024_Project\Data\Original Data\raw_data_AUG_original.xlsx")
     
     pass

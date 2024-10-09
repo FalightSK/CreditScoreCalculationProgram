@@ -102,7 +102,7 @@ def cal_credit_history_length(customer_id, show= False):
     Sf_val = 300 + (x * 550/12)
     if show: print(f'x_val -> {x}, {Sf_val}')
     
-    Sf = min([Sf_freq, Sf_val])
+    Sf = max([Sf_freq, Sf_val])
     Sf = max(min(Sf, 850), 300)
     return Sf
 
