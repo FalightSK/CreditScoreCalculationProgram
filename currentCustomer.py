@@ -369,7 +369,7 @@ def request_new_budget(customer_id, requested_budget, cal_duration= 185, show= F
             score['payment_his'].append(order['local_credit_score_info']['payment_his'])
             score['amount_owed'].append(order['local_credit_score_info']['amount_owed'])
             score['credit_his_len'].append(order['local_credit_score_info']['credit_his_len'])
-            score['credit_mix'].append(order['local_credit_score_info']['credit_mix'])
+            # score['credit_mix'].append(order['local_credit_score_info']['credit_mix'])
             score['new_credit'].append(order['local_credit_score_info']['new_credit'])
         else:
             break
@@ -378,7 +378,7 @@ def request_new_budget(customer_id, requested_budget, cal_duration= 185, show= F
     if len(score['payment_his']) == 0:
         Score = 0.1 * new_credit + 0.9 * info['credit_score']
     else:
-        Score = 0.35 * np.mean(score['payment_his']) + 0.3 * np.mean(score['amount_owed']) + 0.15 * np.mean(score['credit_his_len']) + 0.1 * np.mean(score['credit_mix']) + 0.1 * new_credit
+        Score = 0.35 * np.mean(score['payment_his']) + 0.3 * np.mean(score['amount_owed']) + 0.2 * np.mean(score['credit_his_len']) + 0.15 * new_credit
 
     return int(min(max(Score, 300), 850))
 
@@ -396,7 +396,7 @@ if __name__ == '__main__':
     ### Calculation test
     # requested_budget = 10000
     # print('>>>>> FICO:', cal_FICO_current(customer_ID, P, requested_budget, show = True), '<<<<<')
-    print(f'Credit History: {cal_credit_history_length(customer_ID, True)}')
+    # print(f'Credit History: {cal_credit_history_length(customer_ID, True)}')
 
     
     ### Data retrival test
@@ -422,8 +422,8 @@ if __name__ == '__main__':
 
     
     ### Request new budget
-    # requested_budget = 40000
-    # print(f'Credit Score for requested {requested_budget} is {request_new_budget(customer_ID, requested_budget, show = True)}')
+    requested_budget = 40000
+    print(f'Credit Score for requested {requested_budget} is {request_new_budget(customer_ID, requested_budget, show = True)}')
     
     
     ### Check score

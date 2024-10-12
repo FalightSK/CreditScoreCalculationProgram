@@ -10,7 +10,7 @@ from Script.customerInfo import PaymentInfo
 
 if __name__ == '__main__':
     # _in = input('Enter Customer ID: ')
-    customer_id = '00156'
+    customer_id = '00001'
     # customer_id = '00033'
     
     customer_info = db.get_info_by_id(customer_id)
