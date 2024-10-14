@@ -5,10 +5,11 @@ import matplotlib.pyplot as plt
 import datetime
 import Script.databaseClient as db
 from Script.customerInfo import PaymentInfo
+from Script.databaseClient import *
 
  
 
-if __name__ == '__main__':
+def getExplanation():
     # _in = input('Enter Customer ID: ')
     customer_id = '00001'
     # customer_id = '00033'
@@ -68,3 +69,30 @@ if __name__ == '__main__':
     
     
     pass
+
+
+def getSum():
+    info = read()['history']
+    
+    order = {str(i): 0 for i in range(1, 13)}
+    n= 0
+    
+    for customer in info.values():
+        local_n= 0
+        recording = customer['records']
+        for record in recording.values():
+            # print(record['order_date'][1])
+            print(record['ID'])
+            order[str(record['order_date'][1])] += 1
+            local_n+= 1
+        if local_n > 3:
+            n+= 1
+            
+    print(order)
+    for local_order in order.values():
+        print(n, local_order/n)
+    
+    
+    
+if __name__ == '__main__':
+    getSum()

@@ -196,7 +196,7 @@ def submit_files(credit_score):
         
         temp = db.get_info_by_id(customer_id)
         
-        label_budget_value.config(text=str(int(temp["credit_budget"])) + " THB")
+        label_budget_value.config(text=str(int(temp["credit_budget_per_month"])) + " THB")
         label_term_value.config(text=str(int(temp["credit_terms"])) + " Days")
         
         # Switch to the credit score page
@@ -278,7 +278,7 @@ def craete_table():
         customer_table.insert("", "end", values=(
             customer["customer_id"],
             customer["type"],
-            customer["credit_budget"],
+            customer["credit_budget_per_month"],
             customer["credit_terms"],
             customer["credit_score"],
             emoticon,  # Insert emoticon in place of plain text rating
@@ -352,7 +352,7 @@ def show_curr_analysis(cusID):
     label_credit_score_name.config(text=f"Customer ID: {cusID}")
     label_credit_score_id.config(text=f"Customer Type: {temp['type']}")
     
-    label_budget_value.config(text=str(int(temp["credit_budget"])) + " THB")
+    label_budget_value.config(text=str(int(temp["credit_budget_per_month"])) + " THB")
     label_term_value.config(text=str(int(temp["credit_terms"])) + " Days")
     
     # Switch to the credit score page
@@ -513,7 +513,7 @@ scrollbar = ttk.Scrollbar(table_frame, orient="vertical")
 
 # Config table
 # Table (Treeview) to display customer data
-columns = ("customer_id", "type", "credit_budget", "credit_terms", "credit_score", "rating", "last_update")
+columns = ("customer_id", "type", "credit_budget_per_month", "credit_terms", "credit_score", "rating", "last_update")
 # Define the headings
 customer_table = ttk.Treeview(table_frame, columns=columns, show="headings", height=10, yscrollcommand=scrollbar.set)
 scrollbar.config(command=customer_table.yview) # Adding scroll bar
@@ -524,7 +524,7 @@ customer_table.pack(pady=10, fill="both", expand=True)
 
 customer_table.heading("customer_id", text="Customer ID")
 customer_table.heading("type", text="Type")
-customer_table.heading("credit_budget", text="Credit Budget")
+customer_table.heading("credit_budget_per_month", text="Credit Budget")
 customer_table.heading("credit_terms", text="Credit Terms")
 customer_table.heading("credit_score", text="Credit Score")
 customer_table.heading("rating", text="Rating")
@@ -532,7 +532,7 @@ customer_table.heading("last_update", text="Last Update")
 
 customer_table.column("customer_id", width=100)
 customer_table.column("type", width=150)
-customer_table.column("credit_budget", width=100)
+customer_table.column("credit_budget_per_month", width=100)
 customer_table.column("credit_terms", width=100)
 customer_table.column("credit_score", width=100)
 customer_table.column("rating", width=100)

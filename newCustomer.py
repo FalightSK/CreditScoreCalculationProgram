@@ -71,12 +71,13 @@ def register_new_user(customer_id, customer_type, fin_info, default_credit_terms
         
     
     
-    credit_budget, credit_terms = cal_credit_values(customer_id, credit_score, True)
+    credit_budget, credit_terms, _ = cal_credit_values(customer_id, credit_score, False, True)
     new_user = {
         'customer_id': customer_id,
         'type': customer_type,
         'credit_score': credit_score,
         'credit_budget': credit_budget,
+        'credit_budget_per_month': credit_budget * 3,
         'credit_terms': default_credit_terms,
         'financial_info': fin_info_list,
         'last_update': None,

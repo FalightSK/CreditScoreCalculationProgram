@@ -241,7 +241,7 @@ summary = {
 
 
 if __name__ == '__main__':
-    export_order_info(False, 'Script')
+    export_order_info(True, 'Script')
     pass
     
     

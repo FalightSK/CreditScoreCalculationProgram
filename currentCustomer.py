@@ -2,7 +2,7 @@ import numpy as np
 from Script.customerInfo import *
 import Script.databaseClient as db
 # from Script.databaseClient import *
-from Script.credit_cal import cal_credit_values
+from Script.credit_cal import cal_credit_values ,budget_round
 from datetime import datetime
 import pandas as pd
 
@@ -216,6 +216,7 @@ def cal_new_credit(customer_id, requested_budget, payment_stat= "OVERDUE", set_n
     return max(min(Sf, 850), 300)
 
 def cal_FICO_current(customer_id, payment_info, requested_budget, set_n= 100, show= False):
+    print(customer_id, requested_budget)
     info = db.get_info_by_id(customer_id)
     Score = 0.35 * (payment_his := cal_payment_his(payment_info, credit_term= info['credit_terms'], show= show)) + 0.3 * (amount_owed := cal_amount_owed(payment_info, show= show)) + 0.2 * (credit_history_length := cal_credit_history_length(customer_id, show= show)) + 0.15 * (new_credit := cal_new_credit(customer_id, requested_budget, payment_stat= payment_info.stat, set_n= set_n, show= show))
 
@@ -329,8 +330,9 @@ def add_new_order(customer_id, payment_info, show= False):
     
     ### Update credit budget & terms  
     print('update credit budget')        
-    credit_budget, credit_terms = cal_credit_values(customer_id, show= True)
-    customer_info['credit_budget'] = credit_budget
+    credit_budget, credit_terms, n_per_month = cal_credit_values(customer_id, show= True)
+    customer_info['credit_budget']: credit_budget
+    customer_info['credit_budget_per_month'] = budget_round(credit_budget * n_per_month)
     customer_info['credit_terms'] = credit_terms
     
     ### Record update time
@@ -376,7 +378,7 @@ def request_new_budget(customer_id, requested_budget, cal_duration= 185, show= F
         
         
     if len(score['payment_his']) == 0:
-        Score = 0.1 * new_credit + 0.9 * info['credit_score']
+        Score = 0.15 * new_credit + 0.9 * info['credit_score']
     else:
         Score = 0.35 * np.mean(score['payment_his']) + 0.3 * np.mean(score['amount_owed']) + 0.2 * np.mean(score['credit_his_len']) + 0.15 * new_credit
 
